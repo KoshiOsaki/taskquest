@@ -103,6 +103,68 @@ export default function Home() {
     }
   };
 
+  const handleToggleComplete = async (id: string, completed: boolean) => {
+    const { error } = await supabase
+      .from("quests")
+      .update({ is_done: completed })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating quest:", error);
+    } else {
+      fetchQuests();
+    }
+  };
+
+  const handleDeleteQuest = async (id: string) => {
+    const { error } = await supabase
+      .from("quests")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error deleting quest:", error);
+    } else {
+      fetchQuests();
+    }
+  };
+
+  const handleSkipQuest = async (id: string) => {
+    // 現在のクエストを取得
+    const currentQuest = Object.values(groupedQuests)
+      .flat()
+      .find(quest => quest.id === id);
+    
+    if (!currentQuest) return;
+
+    // 次のタームを計算（0-4の範囲で循環）
+    const nextTerm = currentQuest.term !== undefined ? (currentQuest.term + 1) % 5 : 0;
+
+    const { error } = await supabase
+      .from("quests")
+      .update({ term: nextTerm })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error skipping quest:", error);
+    } else {
+      fetchQuests();
+    }
+  };
+
+  const handleUpdateQuest = async (id: string, newTitle: string) => {
+    const { error } = await supabase
+      .from("quests")
+      .update({ title: newTitle })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating quest:", error);
+    } else {
+      fetchQuests();
+    }
+  };
+
   return (
     <Box maxW="sm" mx="auto" bg="gradient.primary" minH="100vh" p={4}>
       <Box 
@@ -136,6 +198,10 @@ export default function Home() {
           onSave={handleSave}
           onCancel={() => setEditingQuest(null)}
           onSaveAndNew={handleSaveAndNew}
+          onToggleComplete={handleToggleComplete}
+          onDeleteQuest={handleDeleteQuest}
+          onSkipQuest={handleSkipQuest}
+          onUpdateQuest={handleUpdateQuest}
         />
       </Box>
     </Box>

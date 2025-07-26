@@ -1,9 +1,10 @@
 "use client";
 
-import { Box, Flex, Text, VStack } from "@chakra-ui/react";
+import { Box, Flex, Text, VStack, Button } from "@chakra-ui/react";
 import { Quest } from "@/app/page";
 import { QuestItem } from "./QuestItem";
 import { QuestInputForm } from "./QuestInputForm";
+import { FiPlus } from "react-icons/fi";
 
 interface TimelineProps {
   groupedQuests: Record<number, Quest[]>;
@@ -12,6 +13,10 @@ interface TimelineProps {
   onSave: (newTitle: string, term: number) => void;
   onCancel: () => void;
   onSaveAndNew: (newTitle: string, term: number) => void;
+  onToggleComplete?: (id: string, completed: boolean) => void;
+  onDeleteQuest?: (id: string) => void;
+  onSkipQuest?: (id: string) => void;
+  onUpdateQuest?: (id: string, newTitle: string) => void;
 }
 
 export const Timeline = ({
@@ -21,6 +26,10 @@ export const Timeline = ({
   onSave,
   onCancel,
   onSaveAndNew,
+  onToggleComplete,
+  onDeleteQuest,
+  onSkipQuest,
+  onUpdateQuest,
 }: TimelineProps) => {
   const terms = [
     { name: "9-12", startHour: 9 },
@@ -71,9 +80,16 @@ export const Timeline = ({
               boxShadow: "soft",
             }}
           >
-            <VStack align="stretch" gap={1}>
+            <VStack align="stretch" gap={0.5}>
               {groupedQuests[index]?.map((quest) => (
-                <QuestItem key={quest.id} quest={quest} />
+                <QuestItem 
+                  key={quest.id} 
+                  quest={quest}
+                  onToggleComplete={onToggleComplete}
+                  onDelete={onDeleteQuest}
+                  onSkip={onSkipQuest}
+                  onUpdate={onUpdateQuest}
+                />
               ))}
               {editingQuest && editingQuest.term === index && (
                 <QuestInputForm
@@ -82,6 +98,20 @@ export const Timeline = ({
                   onCancel={onCancel}
                   onSaveAndNew={(newTitle) => onSaveAndNew(newTitle, index)}
                 />
+              )}
+              {(!editingQuest || editingQuest.term !== index) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  w="full"
+                  h="6"
+                  opacity={0.4}
+                  _hover={{ opacity: 0.8 }}
+                  onClick={() => onTermClick(index)}
+                  mt={1}
+                >
+                  <FiPlus size={14} />
+                </Button>
               )}
             </VStack>
           </Box>
