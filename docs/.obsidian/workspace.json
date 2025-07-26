@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "memo.md",
+                "file": "design-doc.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "memo"
+              "title": "design-doc"
             }
           }
         ],
@@ -109,7 +109,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "memo.md",
+                "file": "design-doc.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -119,7 +119,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for memo"
+              "title": "Backlinks for design-doc"
             }
           },
           {
@@ -128,12 +128,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "memo.md",
+                "file": "design-doc.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from memo"
+              "title": "Outgoing links from design-doc"
             }
           },
           {
@@ -157,13 +157,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "memo.md",
+                "file": "design-doc.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of memo"
+              "title": "Outline of design-doc"
             }
           }
         ]
@@ -185,10 +185,11 @@
   },
   "active": "1bec38c5ada5ad5a",
   "lastOpenFiles": [
+    "structure.md",
+    "memo.md",
     "project.md",
     "task.md",
     "design-doc.md",
-    "memo.md",
     "Pasted image 20250726190347.png"
   ]
 }

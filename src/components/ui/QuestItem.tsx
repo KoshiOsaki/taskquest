@@ -4,16 +4,16 @@ import { Checkbox, Flex, Text } from '@chakra-ui/react';
 
 interface QuestItemProps {
   name: string;
-  isCompleted: boolean;
+  is_done: boolean;
 }
 
-export const QuestItem = ({ name, isCompleted }: QuestItemProps) => {
+export const QuestItem = ({ name, is_done }: QuestItemProps) => {
   return (
-    <Flex align="center" p={2} bg={isCompleted ? 'gray.100' : 'white'}>
-      <Checkbox.Root defaultChecked={isCompleted} mr={3}>
+    <Flex align="center" p={2} bg={is_done ? 'gray.100' : 'white'}>
+      <Checkbox.Root defaultChecked={is_done} mr={3}>
         <Checkbox.Indicator />
       </Checkbox.Root>
-      <Text textDecoration={isCompleted ? 'line-through' : 'none'} color={isCompleted ? 'gray.500' : 'black'}>
+      <Text textDecoration={is_done ? 'line-through' : 'none'} color={is_done ? 'gray.500' : 'black'}>
         {name}
       </Text>
     </Flex>
