@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Input } from '@chakra-ui/react';
-import { useState, useEffect, useRef } from 'react';
+import { Input } from "@chakra-ui/react";
+import { useState, useEffect, useRef } from "react";
 
 interface QuestInputFormProps {
   title: string;
@@ -10,7 +10,12 @@ interface QuestInputFormProps {
   onSaveAndNew: (newTitle: string) => void;
 }
 
-export const QuestInputForm = ({ title, onSave, onCancel, onSaveAndNew }: QuestInputFormProps) => {
+export const QuestInputForm = ({
+  title,
+  onSave,
+  onCancel,
+  onSaveAndNew,
+}: QuestInputFormProps) => {
   const [currentTitle, setCurrentTitle] = useState(title);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -28,13 +33,13 @@ export const QuestInputForm = ({ title, onSave, onCancel, onSaveAndNew }: QuestI
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       if (currentTitle.trim()) {
         onSaveAndNew(currentTitle);
-        setCurrentTitle(''); // 新しい入力のためにクリア
+        setCurrentTitle(""); // 新しい入力のためにクリア
       }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       onCancel();
     }
   };
@@ -47,10 +52,24 @@ export const QuestInputForm = ({ title, onSave, onCancel, onSaveAndNew }: QuestI
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
       placeholder="クエストを入力..."
-      size="sm"
+      size="md"
       bg="white"
-      borderWidth="1px"
-      borderRadius="md"
+      border="2px solid"
+      borderColor="gray.200"
+      borderRadius="input"
+      boxShadow="soft"
+      fontFamily="'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+      fontSize="md"
+      p={3}
+      transition="all 0.2s ease"
+      _focus={{
+        borderColor: "pop.blue",
+        boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
+        outline: "none",
+      }}
+      _placeholder={{
+        color: "gray.400",
+      }}
     />
   );
 };

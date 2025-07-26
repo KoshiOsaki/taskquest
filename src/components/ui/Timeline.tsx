@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Box, Flex, Text, VStack } from '@chakra-ui/react';
-import { Quest } from '@/app/page';
-import { QuestItem } from './QuestItem';
-import { QuestInputForm } from './QuestInputForm';
+import { Box, Flex, Text, VStack } from "@chakra-ui/react";
+import { Quest } from "@/app/page";
+import { QuestItem } from "./QuestItem";
+import { QuestInputForm } from "./QuestInputForm";
 
 interface TimelineProps {
   groupedQuests: Record<number, Quest[]>;
@@ -23,11 +23,11 @@ export const Timeline = ({
   onSaveAndNew,
 }: TimelineProps) => {
   const terms = [
-    { name: '9-12', startHour: 9 },
-    { name: '12-15', startHour: 12 },
-    { name: '15-18', startHour: 15 },
-    { name: '18-21', startHour: 18 },
-    { name: '21-24', startHour: 21 },
+    { name: "9-12", startHour: 9 },
+    { name: "12-15", startHour: 12 },
+    { name: "15-18", startHour: 15 },
+    { name: "18-21", startHour: 18 },
+    { name: "21-24", startHour: 21 },
   ];
 
   return (
@@ -36,22 +36,40 @@ export const Timeline = ({
         <Flex
           key={term.name}
           minH={`${3 * 60}px`} // 3時間分の高さ
-          borderTop="1px"
-          borderColor="gray.200"
+          borderTop="1px solid"
+          borderColor="gray.100"
           align="flex-start"
+          mb={3}
         >
-          <Box w="50px" textAlign="right" pr={2} pt={1}>
-            <Text fontSize="sm" color="gray.500">{`${term.startHour}:00`}</Text>
+          <Box w="70px" textAlign="right" pr={4} pt={3}>
+            <Text 
+              fontSize="sm" 
+              fontFamily="'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+              fontWeight="600"
+              color="pop.blue"
+              bg="soft.blue"
+              px={2}
+              py={1}
+              borderRadius="button"
+            >
+              {`${term.startHour}:00`}
+            </Text>
           </Box>
           <Box
             flex={1}
-            borderLeft="1px"
-            borderColor="gray.200"
-            p={1}
+            borderLeft="3px solid"
+            borderColor="pop.blue"
+            borderRadius="0 8px 8px 0"
+            p={3}
             h="100%"
             cursor="pointer"
+            transition="all 0.3s ease"
             onClick={() => onTermClick(index)}
-            _hover={{ bg: 'gray.50' }}
+            _hover={{ 
+              bg: "soft.blue",
+              transform: "translateY(-2px)",
+              boxShadow: "soft",
+            }}
           >
             <VStack align="stretch" gap={1}>
               {groupedQuests[index]?.map((quest) => (
