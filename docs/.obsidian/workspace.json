@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "task.md",
+                "file": "memo.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "task"
+              "title": "memo"
             }
           }
         ],
@@ -109,7 +109,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "task.md",
+                "file": "memo.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -119,7 +119,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for task"
+              "title": "Backlinks for memo"
             }
           },
           {
@@ -128,12 +128,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "task.md",
+                "file": "memo.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from task"
+              "title": "Outgoing links from memo"
             }
           },
           {
@@ -157,13 +157,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "task.md",
+                "file": "memo.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of task"
+              "title": "Outline of memo"
             }
           }
         ]
@@ -185,9 +185,10 @@
   },
   "active": "1bec38c5ada5ad5a",
   "lastOpenFiles": [
+    "project.md",
+    "task.md",
     "design-doc.md",
     "memo.md",
-    "Pasted image 20250726190347.png",
-    "project.md"
+    "Pasted image 20250726190347.png"
   ]
 }

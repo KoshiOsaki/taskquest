@@ -3,8 +3,11 @@
 import { Flex, Heading, IconButton } from '@chakra-ui/react';
 import { FaChevronLeft } from 'react-icons/fa';
 import LoginButton from './LoginButton';
+import UserProfile from './UserProfile';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Header = () => {
+  const { user } = useAuth();
   // 仮の日付データ
   const today = new Date();
   const dateString = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
@@ -25,7 +28,7 @@ export const Header = () => {
       <Heading as="h1" size="md">
         {dateString}
       </Heading>
-      <LoginButton />
+      {user ? <UserProfile /> : <LoginButton />}
     </Flex>
   );
 };
