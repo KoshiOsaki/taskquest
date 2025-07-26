@@ -1,20 +1,23 @@
 'use client';
 
 import { Checkbox, Flex, Text } from '@chakra-ui/react';
+import { Quest } from '@/app/page';
 
 interface QuestItemProps {
-  name: string;
-  is_done: boolean;
+  quest: Quest;
 }
 
-export const QuestItem = ({ name, is_done }: QuestItemProps) => {
+export const QuestItem = ({ quest }: QuestItemProps) => {
+  const { title, is_done } = quest;
   return (
-    <Flex align="center" p={2} bg={is_done ? 'gray.100' : 'white'}>
-      <Checkbox.Root defaultChecked={is_done} mr={3}>
+    <Flex align="center" p={2} bg={is_done ? 'gray.100' : 'white'}
+      borderWidth="1px"
+      borderRadius="md">
+            <Checkbox.Root defaultChecked={is_done} mr={3}>
         <Checkbox.Indicator />
       </Checkbox.Root>
-      <Text textDecoration={is_done ? 'line-through' : 'none'} color={is_done ? 'gray.500' : 'black'}>
-        {name}
+            <Text fontSize="sm" textDecoration={is_done ? 'line-through' : 'none'} color={is_done ? 'gray.500' : 'black'}>
+        {title}
       </Text>
     </Flex>
   );
