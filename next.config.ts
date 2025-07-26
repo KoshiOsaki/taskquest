@@ -1,22 +1,19 @@
-import withPWA from "next-pwa";
 import type { NextConfig } from "next";
+import createPWA from "next-pwa";
+import runtimeCaching from "next-pwa/cache";
 
-export default withPWA<NextConfig>({
-  output: "export", // 既存設定そのまま
-  pwa: {
-    dest: "public", // `next export` 後に sw/manifest を public 直下へ生成
-    register: true, // _app.tsx に何も書かなくても SW 自動登録
-    skipWaiting: true, // 新SWを即時アクティブ化
-    runtimeCaching: [
-      // 画像・フォントなどを Cache First にする例
-      {
-        urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-        handler: "CacheFirst",
-        options: {
-          cacheName: "images",
-          expiration: { maxEntries: 60, maxAgeSeconds: 30 * 24 * 60 * 60 },
-        },
-      },
-    ],
-  },
+const withPWA = createPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  runtimeCaching,
 });
+
+const nextConfig: NextConfig = {
+  output: "export",
+  reactStrictMode: true,
+};
+
+// Next.js v15 と next-pwa の型定義の競合を避けるため any にキャストします
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default withPWA(nextConfig as any);
