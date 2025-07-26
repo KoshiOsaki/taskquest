@@ -167,29 +167,15 @@ export default function Home() {
 
   return (
     <Box maxW="sm" mx="auto" bg="gradient.primary" minH="100vh" p={4}>
-      <Box 
-        mb={6}
-        borderRadius="card"
-        boxShadow="soft"
-        bg="white"
-        p={4}
-        _hover={{
-          transform: "translateY(-2px)",
-          boxShadow: "medium",
-        }}
-        transition="all 0.3s ease"
-      >
-        <Header />
-      </Box>
+      <Header />
       <Box 
         position="relative" 
-        mt={4} 
-        h={`calc(24 * 60px)`}
+        mt="60px"
         borderRadius="card"
         boxShadow="soft"
         bg="white"
         p={4}
-        overflow="hidden"
+        minH="calc(100vh - 120px)"
       >
         <Timeline
           groupedQuests={groupedQuests}
