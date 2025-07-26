@@ -32,7 +32,8 @@ export const QuestItem = ({
     }
   }, [isEditing]);
 
-  const handleInputClick = () => {
+  const handleInputClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 親要素へのイベント伝播を防ぐ
     if (!is_done) {
       setIsEditing(true);
     }
@@ -64,6 +65,7 @@ export const QuestItem = ({
       py={1}
       gap={2}
       opacity={is_done ? 0.6 : 1}
+      onClick={(e) => e.stopPropagation()} // 親要素へのイベント伝播を防ぐ
     >
       <Checkbox.Root 
         checked={is_done} 
@@ -113,7 +115,10 @@ export const QuestItem = ({
         aria-label="次のタームにスキップ"
         size="xs"
         variant="ghost"
-        onClick={() => onSkip?.(id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSkip?.(id);
+        }}
         opacity={0.6}
         _hover={{ opacity: 1 }}
       >
@@ -125,7 +130,10 @@ export const QuestItem = ({
         size="xs"
         variant="ghost"
         colorScheme="red"
-        onClick={() => onDelete?.(id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete?.(id);
+        }}
         opacity={0.6}
         _hover={{ opacity: 1 }}
       >
