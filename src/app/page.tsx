@@ -1,21 +1,21 @@
-import { Box } from '@chakra-ui/react';
-import { Header } from '@/components/ui/Header';
-import { QuestInputForm } from '@/components/ui/QuestInputForm';
-import { QuestItem } from '@/components/ui/QuestItem';
-import { Timeline } from '@/components/ui/Timeline';
+import { Box } from "@chakra-ui/react";
+import { Header } from "@/components/ui/Header";
+import { QuestInputForm } from "@/components/ui/QuestInputForm";
+import { QuestItem } from "@/components/ui/QuestItem";
+import { Timeline } from "@/components/ui/Timeline";
 
 export default function Home() {
   // 仮のクエストデータ
   const quests = [
-    { id: 1, name: '朝の散歩', isCompleted: true, time: '9:00' },
-    { id: 2, name: 'デザインカンプ作成', isCompleted: false, time: '11:00' },
-    { id: 3, name: 'チームミーティング', isCompleted: false, time: '14:30' },
-    { id: 4, name: 'コードレビュー', isCompleted: true, time: '16:00' },
+    { id: 1, name: "朝の散歩", isCompleted: true, time: "9:00" },
+    { id: 2, name: "デザインカンプ作成", isCompleted: false, time: "11:00" },
+    { id: 3, name: "チームミーティング", isCompleted: false, time: "14:30" },
+    { id: 4, name: "コードレビュー", isCompleted: true, time: "16:00" },
   ];
 
   // 時間文字列を分に変換するヘルパー関数
   const timeToMinutes = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number);
+    const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
   };
 
@@ -42,4 +42,3 @@ export default function Home() {
     </Box>
   );
 }
-
