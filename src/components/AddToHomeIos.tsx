@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Box, Text, Button } from "@chakra-ui/react";
 
 interface NavigatorWithStandalone extends Navigator {
   standalone?: boolean;
@@ -17,15 +18,33 @@ export default function AddToHomeIos() {
 
   if (!show) return null;
   return (
-    <div className="fixed bottom-4 left-4 right-4 rounded-xl shadow-lg bg-white/90 p-4 backdrop-blur">
-      <p className="text-sm">
+    <Box
+      position="fixed"
+      bottom={4}
+      left={4}
+      right={4}
+      p={4}
+      borderRadius="xl"
+      bg="whiteAlpha.900"
+      boxShadow="lg"
+      backdropFilter="blur(8px)"
+    >
+      <Text fontSize="sm">
         ホーム画面に追加するには
-        <strong>共有ボタン→「ホーム画面に追加」</strong>
+        <Text as="span" fontWeight="bold">
+          共有ボタン→「ホーム画面に追加」
+        </Text>
         をタップしてください
-      </p>
-      <button onClick={() => setShow(false)} className="mt-2 text-blue-600">
+      </Text>
+      <Button
+        variant="ghost"
+        colorScheme="blue"
+        onClick={() => setShow(false)}
+        size="sm"
+        mt={2}
+      >
         閉じる
-      </button>
-    </div>
+      </Button>
+    </Box>
   );
 }

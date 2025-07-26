@@ -7,11 +7,18 @@ const withPWA = createPWA({
   register: true,
   skipWaiting: true,
   runtimeCaching,
+  disable: process.env.NODE_ENV === "development",
 });
 
 const nextConfig: NextConfig = {
   output: "export",
   reactStrictMode: true,
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = false;
+    }
+    return config;
+  },
 };
 
 // Next.js v15 と next-pwa の型定義の競合を避けるため any にキャストします

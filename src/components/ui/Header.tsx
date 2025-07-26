@@ -1,7 +1,8 @@
 'use client';
 
 import { Flex, Heading, IconButton } from '@chakra-ui/react';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft } from 'react-icons/fa';
+import LoginButton from './LoginButton';
 
 export const Header = () => {
   // 仮の日付データ
@@ -24,9 +25,7 @@ export const Header = () => {
       <Heading as="h1" size="md">
         {dateString}
       </Heading>
-      <IconButton aria-label="Next day" variant="ghost">
-        <FaChevronRight />
-      </IconButton>
+      <LoginButton />
     </Flex>
   );
 };
