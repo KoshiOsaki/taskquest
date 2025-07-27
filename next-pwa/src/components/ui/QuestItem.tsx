@@ -4,7 +4,6 @@ import { Checkbox, Flex, Input, IconButton, Box } from "@chakra-ui/react";
 import { Quest } from "../../app/page";
 import { useState, useRef, useEffect } from "react";
 import { FiTrash2, FiSkipForward, FiMenu } from "react-icons/fi";
-import { Reorder } from "framer-motion";
 
 interface QuestItemProps {
   quest: Quest;
@@ -12,6 +11,7 @@ interface QuestItemProps {
   onDelete?: (id: string) => void;
   onSkip?: (id: string) => void;
   onUpdate?: (id: string, newTitle: string) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dragControls?: any; // framer-motionのdragControlsを受け取る
 }
 

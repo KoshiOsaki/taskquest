@@ -2,12 +2,10 @@
 
 import { Box, Text, VStack, HStack, Button } from "@chakra-ui/react";
 import { Quest } from "../../app/page";
-import { QuestItem } from "./QuestItem";
 import { QuestInputForm } from "./QuestInputForm";
 import { QuestReorderList } from "./QuestReorderList";
 import { FiPlus } from "react-icons/fi";
 import UserProfile from "./UserProfile";
-import { Reorder, useDragControls } from "framer-motion";
 
 interface TimelineProps {
   groupedQuests: Record<number, Quest[]>;
@@ -239,7 +237,9 @@ export const Timeline = ({
                       <VStack align="stretch" gap={1}>
                         {/* クエスト一覧 */}
                         <QuestReorderList
-                          quests={groupedQuests[originalIndex + dayOffset * 5] || []}
+                          quests={
+                            groupedQuests[originalIndex + dayOffset * 5] || []
+                          }
                           termIndex={originalIndex + dayOffset * 5}
                           onToggleComplete={onToggleComplete}
                           onDelete={onDeleteQuest}
