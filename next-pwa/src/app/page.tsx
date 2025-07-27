@@ -36,6 +36,21 @@ export default function Home() {
     fetchQuests();
   }, []);
 
+  // 現在の時刻から現在のタームを算出する関数
+  const getCurrentTerm = (): number => {
+    const now = new Date();
+    const hour = now.getHours();
+    
+    if (hour >= 9 && hour < 12) return 0;  // T1: 9-12時
+    if (hour >= 12 && hour < 15) return 1; // T2: 12-15時
+    if (hour >= 15 && hour < 18) return 2; // T3: 15-18時
+    if (hour >= 18 && hour < 21) return 3; // T4: 18-21時
+    if (hour >= 21 && hour < 24) return 4; // T5: 21-24時
+    
+    // 深夜・早朝は最初のターム（9-12時）を返す
+    return 0;
+  };
+
   const fetchQuests = async () => {
     const { data, error } = await supabase
       .from("quests")
@@ -166,6 +181,9 @@ export default function Home() {
     }
   };
 
+  // アプリ起動時に現在のタームを取得
+  const currentTerm = getCurrentTerm();
+
   return (
     <Box maxW="sm" mx="auto" bg="gradient.primary" minH="100vh" p={4}>
       <Header />
@@ -189,6 +207,7 @@ export default function Home() {
           onDeleteQuest={handleDeleteQuest}
           onSkipQuest={handleSkipQuest}
           onUpdateQuest={handleUpdateQuest}
+          currentTerm={currentTerm} // 現在のタームを渡す
         />
         <Footer />
       </Box>
