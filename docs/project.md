@@ -5,4 +5,5 @@
 ```
 supabase db diff -f
 supabase db push
+supabase functions deploy sendTermNotification
 ```
