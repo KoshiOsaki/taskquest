@@ -19,6 +19,7 @@ export interface Quest {
   term?: number;
   category?: string;
   is_done: boolean;
+  order: number; // 並び順
   created_at: string; // timestamptz
 }
 
@@ -56,7 +57,8 @@ export default function Home() {
       .from("quests")
       .select("*")
       // .eq('due_date', new Date().toISOString().split('T')[0]) // 今日のクエストのみ取得する場合
-      .order("term", { ascending: true });
+      .order("term", { ascending: true })
+      .order("order", { ascending: true });
     if (error) {
       console.error("Error fetching quests:", error);
     } else if (data) {
@@ -99,6 +101,18 @@ export default function Home() {
       return;
     }
 
+    // 同じtermの最大orderを取得
+    const { data: maxOrderData } = await supabase
+      .from("quests")
+      .select("order")
+      .eq("term", term)
+      .eq("user_id", user.id)
+      .order("order", { ascending: false })
+      .limit(1);
+
+    // 最大orderに+1した値を使用（存在しない場合は0から開始）
+    const newOrder = maxOrderData && maxOrderData.length > 0 ? maxOrderData[0].order + 1 : 0;
+
     const { error } = await supabase.from("quests").insert([
       {
         title,
@@ -106,6 +120,7 @@ export default function Home() {
         due_date: new Date().toISOString().split("T")[0], // 今日の日付
         term,
         is_done: false,
+        order: newOrder,
       },
     ]);
 
@@ -135,13 +150,57 @@ export default function Home() {
   };
 
   const handleDeleteQuest = async (id: string) => {
+    // 削除するクエストの情報を取得
+    const { data: questToDelete } = await supabase
+      .from("quests")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!questToDelete) {
+      console.error("Quest not found");
+      return;
+    }
+
+    // クエストを削除
     const { error } = await supabase.from("quests").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting quest:", error);
-    } else {
-      fetchQuests();
+      return;
     }
+
+    // 同じtermの、削除したクエストより大きいorderを持つクエストを取得
+    const { data: questsToUpdate, error: fetchError } = await supabase
+      .from("quests")
+      .select("*")
+      .eq("term", questToDelete.term)
+      .gt("order", questToDelete.order);
+      
+    if (fetchError) {
+      console.error("Error fetching quests to update:", fetchError);
+      return;
+    }
+    
+    // 各クエストのorderを1つ減らす
+    if (questsToUpdate && questsToUpdate.length > 0) {
+      const updatePromises = questsToUpdate.map(quest => {
+        return supabase
+          .from("quests")
+          .update({ order: quest.order - 1 })
+          .eq("id", quest.id);
+      });
+      
+      // すべての更新を並行して実行
+      const updateResults = await Promise.all(updatePromises);
+      const updateError = updateResults.find(result => result.error);
+      
+      if (updateError) {
+        console.error("Error updating orders:", updateError);
+      }
+    }
+
+    fetchQuests();
   };
 
   const handleSkipQuest = async (id: string) => {
