@@ -1,196 +1,125 @@
+// deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as webPush from "https://esm.sh/web-push@3";
+import {
+  ApplicationServer,
+  Urgency,
+} from "jsr:@negrel/webpush@0.5";
 
-// 型定義
-interface PushSubscription {
-  id: string;
-  user_id: string;
-  subscription: {
-    endpoint: string;
-    keys: {
-      p256dh: string;
-      auth: string;
-    };
+// -------- ユーティリティ --------
+const env = (k: string) => Deno.env.get(k) ??
+  (() => { throw new Error(`${k} not set`); })();
+
+const b64urlToUint8 = (b64url: string): Uint8Array => {
+  const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/")
+    .padEnd(Math.ceil(b64url.length / 4) * 4, "=");
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+};
+
+const rawKeysToCryptoKeyPair = async (
+  publicKeyB64: string,
+  privateKeyB64: string,
+): Promise<CryptoKeyPair> => {
+  // --- public ---
+  const pubBytes = b64urlToUint8(publicKeyB64);          // 65byte (0x04 | X | Y)
+  const x = pubBytes.slice(1, 33);
+  const y = pubBytes.slice(33, 65);
+  const pubJwk = {
+    kty: "EC",
+    crv: "P-256",
+    x: btoa(String.fromCharCode(...x))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""),
+    y: btoa(String.fromCharCode(...y))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""),
+    ext: true,
   };
-  created_at: string;
-}
 
-interface NotificationPayload {
-  title: string;
-  options: {
-    tag: string;
-    renotify: boolean;
-    vibrate: number[];
+  // --- private ---
+  const dBytes = b64urlToUint8(privateKeyB64);           // 32byte
+  const privJwk = {
+    ...pubJwk,
+    d: btoa(String.fromCharCode(...dBytes))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""),
   };
-}
 
-interface NotificationResult {
-  success: boolean;
-  subscriptionId: string;
-  error?: Error | string;
-}
+  const algo = { name: "ECDSA", namedCurve: "P-256" };
+  const crypto = globalThis.crypto.subtle;
 
-// 環境変数の安全な取得
-function getRequiredEnv(key: string): string {
-  const value = Deno.env.get(key);
-  if (!value) {
-    throw new Error(`Required environment variable ${key} is not set`);
-  }
-  return value;
-}
+  return {
+    publicKey: await crypto.importKey("jwk", pubJwk, algo, true, ["verify"]),
+    privateKey: await crypto.importKey("jwk", privJwk, algo, false, ["sign"]),
+  };
+};
 
-try {
-  // Supabaseクライアントの初期化
-  const supabase = createClient(
-    getRequiredEnv("SUPABASE_URL"),
-    getRequiredEnv("SUPABASE_ANON_KEY")
-  );
+// -------- 初期化 --------
+const supabase = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
 
-  // VAPID設定
-  webPush.setVapidDetails(
-    "mailto:admin@example.com",
-    getRequiredEnv("VAPID_PUBLIC"),
-    getRequiredEnv("VAPID_PRIVATE")
-  );
+// Node 形式の VAPID 鍵を CryptoKeyPair へ変換
+const vapidKeys = await rawKeysToCryptoKeyPair(
+  env("VAPID_PUBLIC_KEY"),
+  env("VAPID_PRIVATE_KEY"),
+);
 
-  Deno.serve(async (req: Request) => {
-    try {
-      // CORSヘッダーの設定
-      const corsHeaders = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers":
-          "authorization, x-client-info, apikey, content-type",
-      };
+const appServer = await ApplicationServer.new({
+  contactInformation: "mailto:admin@example.com",
+  vapidKeys,
+});
 
-      // OPTIONSリクエストの処理
-      if (req.method === "OPTIONS") {
-        return new Response("ok", { headers: corsHeaders });
-      }
-
-      // POSTメソッドのみ許可
-      if (req.method !== "POST") {
-        return new Response(JSON.stringify({ error: "Method not allowed" }), {
-          status: 405,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // タームの決定
-      const term = Deno.env.get("TERM_NAME") ?? "ターム3";
-      console.log(`Sending notifications for ${term}`);
-
-      // プッシュ通知購読者の取得
-      const { data: subs, error: fetchError } = await supabase
-        .from("push_subscriptions")
-        .select("*");
-
-      if (fetchError) {
-        console.error("Error fetching subscriptions:", fetchError);
-        return new Response(
-          JSON.stringify({ error: "Failed to fetch subscriptions" }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-
-      if (!subs || subs.length === 0) {
-        console.log("No subscriptions found");
-        return new Response(
-          JSON.stringify({ message: "No subscriptions found" }),
-          {
-            status: 200,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-
-      console.log(`Found ${subs.length} subscriptions`);
-
-      // 通知ペイロードの作成
-      const payload: NotificationPayload = {
-        title: `${term} 終了です！！！`,
-        options: {
-          tag: `term-end-${term}`,
-          renotify: true,
-          vibrate: [200, 100, 200],
-        },
-      };
-
-      let successCount = 0;
-      let errorCount = 0;
-
-      // 7回連続送信
-      for (let i = 0; i < 7; i++) {
-        console.log(`Sending notification batch ${i + 1}/7`);
-
-        const results = await Promise.allSettled(
-          subs.map(
-            async (sub: PushSubscription): Promise<NotificationResult> => {
-              try {
-                await webPush.sendNotification(
-                  sub.subscription,
-                  JSON.stringify(payload)
-                );
-                return { success: true, subscriptionId: sub.id };
-              } catch (error) {
-                console.error(
-                  `Failed to send to subscription ${sub.id}:`,
-                  error
-                );
-                return {
-                  success: false,
-                  subscriptionId: sub.id,
-                  error: error instanceof Error ? error.message : String(error),
-                };
-              }
-            }
-          )
-        );
-
-        // 結果の集計
-        results.forEach((result: PromiseSettledResult<NotificationResult>) => {
-          if (result.status === "fulfilled" && result.value.success) {
-            successCount++;
-          } else {
-            errorCount++;
-          }
-        });
-
-        // バッチ間の待機時間（1秒）
-        if (i < 6) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-
-      console.log(
-        `Notification sending completed. Success: ${successCount}, Errors: ${errorCount}`
-      );
-
-      return new Response(
-        JSON.stringify({
-          message: "Notifications sent",
-          term,
-          batches: 7,
-          totalAttempts: subs.length * 7,
-          successCount,
-          errorCount,
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    } catch (error) {
-      console.error("Error in request handler:", error);
-      return new Response(JSON.stringify({ error: "Internal server error" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+// -------- 送信ヘルパ --------
+async function sendWebPush(
+  sub: any,
+  payload: string,
+): Promise<void> {
+  await appServer.subscribe(sub).pushTextMessage(payload, {
+    urgency: Urgency.Normal,
   });
-} catch (error) {
-  console.error("Failed to initialize function:", error);
-  throw error;
 }
+
+// -------- Edge Function --------
+Deno.serve(async req => {
+  const cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+  };
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405, headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+
+  try {
+    const term = Deno.env.get("TERM_NAME") ?? "ターム3";
+    const { data: subs, error } = await supabase.from("push_subscriptions").select("*");
+    if (error) throw error;
+    if (!subs?.length) {
+      return new Response(JSON.stringify({ message: "No subscriptions found" }),
+        { headers: { ...cors, "Content-Type": "application/json" } });
+    }
+
+    const payload = JSON.stringify({
+      title: `${term} 終了です！！！`,
+      options: { tag: `term-end-${term}`, renotify: true, vibrate: [200, 100, 200] },
+    });
+
+    let ok = 0, ng = 0;
+    for (let i = 0; i < 7; i++) {
+      const results = await Promise.allSettled(
+        subs.map(async (s: any) => {
+          try { await sendWebPush(s.subscription, payload); ok++; }
+          catch (e) { console.error(`send error (${s.id})`, e); ng++; }
+        }),
+      );
+      if (i < 6) await new Promise(r => setTimeout(r, 1_000));
+    }
+
+    return new Response(JSON.stringify({
+      term, batches: 7, totalAttempts: subs.length * 7, success: ok, fail: ng,
+    }), { headers: { ...cors, "Content-Type": "application/json" } });
+  } catch (e) {
+    console.error(e);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500, headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+});
