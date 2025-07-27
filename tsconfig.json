@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
+    // Base options for the entire monorepo
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -13,20 +13,12 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "noEmit": true,
+
+    // Path alias for editor intellisense
     "paths": {
-      "@/*": ["next-pwa/src/*"]
+      "@/*": ["./next-pwa/src/*"]
     }
   },
-  "include": [
-    "next-pwa/next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
   "exclude": ["node_modules"]
 }

@@ -1,0 +1,14 @@
+{
+  "name": "taskquest",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "next-pwa"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w next-pwa",
+    "build": "npm run build -w next-pwa",
+    "start": "npm run start -w next-pwa",
+    "lint": "npm run lint -w next-pwa"
+  }
+}

@@ -87,7 +87,7 @@ export default function PushNotificationSetup() {
       // iOS PWAの場合の追加メッセージ
       if (
         /iPhone|iPad|iPod/.test(navigator.userAgent) &&
-        (window as any).navigator.standalone
+        (window.navigator as { standalone?: boolean }).standalone
       ) {
         setStatus("プッシュ通知が有効になりました！（PWAモード）");
       } else if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
