@@ -83,7 +83,7 @@ export const QuestItem = ({
       >
         <FiMenu size={14} />
       </Box>
-      
+
       <Checkbox.Root
         checked={is_done}
         onCheckedChange={(checked) => onToggleComplete?.(id, !!checked.checked)}

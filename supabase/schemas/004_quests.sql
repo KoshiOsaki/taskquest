@@ -5,6 +5,7 @@ create table if not exists public.quests (
   title text not null,
   due_date date not null,
   term smallint, -- 0: 6-9, 1: 9-12, 2: 12-15, 3: 15-18, 4: 18-21, 5: 21-24, 6: 0-3, 7: 3-6
+  -- 1~5 のみ現在は使用
   category public.quest_category,
   is_done boolean default false not null,
   quest_order integer default 0 not null,

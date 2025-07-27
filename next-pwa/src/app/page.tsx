@@ -244,13 +244,32 @@ export default function Home() {
 
     if (!currentQuest) return;
 
-    // 次のタームを計算（0-4の範囲で循環）
-    const nextTerm =
-      currentQuest.term !== undefined ? (currentQuest.term + 1) % 5 : 0;
+    // 次のタームと日付を計算
+    let nextTerm = 1; // デフォルトは1（タームは1〜5を使用）
+    
+    // 日付文字列を正しくパースする
+    const [year, month, day] = currentQuest.due_date.split('-').map(Number);
+    // 月は0ベースなので-1する
+    const nextDate = new Date(year, month - 1, day);
+    
+    // 現在のタームが5（最終ターム）の場合、次の日の1タームに移動
+    if (currentQuest.term === 5) {
+      nextTerm = 1; // 次の日の最初のターム（1）
+      nextDate.setDate(nextDate.getDate() + 1); // 日付を1日進める
+    } else {
+      // それ以外の場合は同じ日の次のタームに移動
+      nextTerm = (currentQuest.term !== undefined ? currentQuest.term + 1 : 1);
+    }
 
+    // YYYY-MM-DD形式の日付文字列を生成
+    const formattedDate = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+    
     const { error } = await supabase
       .from("quests")
-      .update({ term: nextTerm })
+      .update({ 
+        term: nextTerm,
+        due_date: formattedDate // 正しくフォーマットされた日付
+      })
       .eq("id", id);
 
     if (error) {
