@@ -43,5 +43,5 @@ next-env.d.ts
 .firebase/*
 
 # Service Worker and Workbox files
-/public/sw.js
-/public/workbox-*.js
+/next-pwa/public/sw.js
+/next-pwa/public/workbox-*.js
