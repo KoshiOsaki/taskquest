@@ -1,3 +1,5 @@
 /docs配下のドキュメントを参照してください
 - dbスキーマは、supabase/schemas/を参照してください
 - chakra ui v3を使用しています。エラーが出たら公式ドキュメントをちゃんと確認してください
+- supabaseのdb schemaは、まずsupabase/schemas/にファイルを追加する。次に、supabase db diff -f でmigrationファイルを作成。supabase db push.
+という手順で行います

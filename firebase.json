@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "out",
+    "public": "next-pwa/out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [{ "source": "**", "destination": "/index.html" }],
     "headers": [

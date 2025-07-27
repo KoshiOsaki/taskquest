@@ -1,7 +1,7 @@
 "use client";
 
 import { Checkbox, Flex, Input, IconButton } from "@chakra-ui/react";
-import { Quest } from "@/app/page";
+import { Quest } from "../../app/page";
 import { useState, useRef, useEffect } from "react";
 import { FiTrash2, FiSkipForward } from "react-icons/fi";
 
@@ -13,12 +13,12 @@ interface QuestItemProps {
   onUpdate?: (id: string, newTitle: string) => void;
 }
 
-export const QuestItem = ({ 
-  quest, 
-  onToggleComplete, 
-  onDelete, 
-  onSkip, 
-  onUpdate 
+export const QuestItem = ({
+  quest,
+  onToggleComplete,
+  onDelete,
+  onSkip,
+  onUpdate,
 }: QuestItemProps) => {
   const { id, title, is_done } = quest;
   const [isEditing, setIsEditing] = useState(false);
@@ -47,9 +47,9 @@ export const QuestItem = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSave();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setEditTitle(title);
       setIsEditing(false);
     }
@@ -67,13 +67,13 @@ export const QuestItem = ({
       opacity={is_done ? 0.6 : 1}
       onClick={(e) => e.stopPropagation()} // 親要素へのイベント伝播を防ぐ
     >
-      <Checkbox.Root 
-        checked={is_done} 
+      <Checkbox.Root
+        checked={is_done}
         onCheckedChange={(checked) => onToggleComplete?.(id, !!checked.checked)}
       >
         <Checkbox.Indicator />
       </Checkbox.Root>
-      
+
       {isEditing ? (
         <Input
           ref={inputRef}
@@ -110,7 +110,7 @@ export const QuestItem = ({
           _focus={{ boxShadow: "none" }}
         />
       )}
-      
+
       <IconButton
         aria-label="次のタームにスキップ"
         size="xs"
@@ -124,7 +124,7 @@ export const QuestItem = ({
       >
         <FiSkipForward />
       </IconButton>
-      
+
       <IconButton
         aria-label="削除"
         size="xs"

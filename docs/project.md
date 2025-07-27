@@ -4,5 +4,5 @@
 
 ```
 supabase db diff -f
-supabase db push --project-ref sbplpnjgazevyvqlqkcv
+supabase db push
 ```

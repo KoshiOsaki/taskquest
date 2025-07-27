@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Box } from "@chakra-ui/react";
-import { Header } from "@/components/ui/Header";
+import { Header } from "../components/ui/Header";
 
-import { Timeline } from "@/components/ui/Timeline";
-import { supabase } from "@/lib/supabase/client";
+import { Timeline } from "../components/ui/Timeline";
+import { supabase } from "../lib/supabase/client";
 
 // Questの型定義
 export interface Quest {
@@ -117,10 +117,7 @@ export default function Home() {
   };
 
   const handleDeleteQuest = async (id: string) => {
-    const { error } = await supabase
-      .from("quests")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("quests").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting quest:", error);
@@ -133,12 +130,13 @@ export default function Home() {
     // 現在のクエストを取得
     const currentQuest = Object.values(groupedQuests)
       .flat()
-      .find(quest => quest.id === id);
-    
+      .find((quest) => quest.id === id);
+
     if (!currentQuest) return;
 
     // 次のタームを計算（0-4の範囲で循環）
-    const nextTerm = currentQuest.term !== undefined ? (currentQuest.term + 1) % 5 : 0;
+    const nextTerm =
+      currentQuest.term !== undefined ? (currentQuest.term + 1) % 5 : 0;
 
     const { error } = await supabase
       .from("quests")
@@ -168,8 +166,8 @@ export default function Home() {
   return (
     <Box maxW="sm" mx="auto" bg="gradient.primary" minH="100vh" p={4}>
       <Header />
-      <Box 
-        position="relative" 
+      <Box
+        position="relative"
         mt="60px"
         borderRadius="card"
         boxShadow="soft"

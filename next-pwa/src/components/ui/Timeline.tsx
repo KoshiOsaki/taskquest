@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Text, VStack, HStack, Button } from "@chakra-ui/react";
-import { Quest } from "@/app/page";
+import { Quest } from "../../app/page";
 import { QuestItem } from "./QuestItem";
 import { QuestInputForm } from "./QuestInputForm";
 import { FiPlus } from "react-icons/fi";

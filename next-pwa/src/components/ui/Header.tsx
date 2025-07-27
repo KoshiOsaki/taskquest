@@ -3,7 +3,7 @@
 import { Flex } from "@chakra-ui/react";
 import LoginButton from "./LoginButton";
 import UserProfile from "./UserProfile";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 export const Header = () => {
   const { user } = useAuth();
