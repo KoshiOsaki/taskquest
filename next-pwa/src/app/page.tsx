@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Box } from "@chakra-ui/react";
 import { Header } from "../components/ui/Header";
-
+import { Footer } from "../components/ui/Footer";
 import { Timeline } from "../components/ui/Timeline";
 import { supabase } from "../lib/supabase/client";
 
@@ -187,6 +187,7 @@ export default function Home() {
           onSkipQuest={handleSkipQuest}
           onUpdateQuest={handleUpdateQuest}
         />
+        <Footer />
       </Box>
     </Box>
   );
