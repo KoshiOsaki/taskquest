@@ -5,6 +5,8 @@ import { Box } from "@chakra-ui/react";
 import { Header } from "../components/ui/Header";
 import { Footer } from "../components/ui/Footer";
 import { Timeline } from "../components/ui/Timeline";
+import { MemoDrawer } from "../components/ui/MemoDrawer";
+import { MemoTab } from "../components/ui/MemoTab";
 import { supabase } from "../lib/supabase/client";
 
 // Questの型定義
@@ -28,6 +30,7 @@ export default function Home() {
     term: number;
     title: string;
   } | null>(null);
+  const [isMemoOpen, setIsMemoOpen] = useState(false);
 
   useEffect(() => {
     fetchQuests();
@@ -189,6 +192,15 @@ export default function Home() {
         />
         <Footer />
       </Box>
+      {/* メモ機能 */}
+      <MemoTab 
+        onClick={() => setIsMemoOpen(true)} 
+        isExpanded={isMemoOpen}
+      />
+      <MemoDrawer 
+        isOpen={isMemoOpen} 
+        onClose={() => setIsMemoOpen(false)} 
+      />
     </Box>
   );
 }
