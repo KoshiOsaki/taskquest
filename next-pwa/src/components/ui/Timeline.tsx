@@ -4,8 +4,10 @@ import { Box, Text, VStack, HStack, Button } from "@chakra-ui/react";
 import { Quest } from "../../app/page";
 import { QuestItem } from "./QuestItem";
 import { QuestInputForm } from "./QuestInputForm";
+import { QuestReorderList } from "./QuestReorderList";
 import { FiPlus } from "react-icons/fi";
 import UserProfile from "./UserProfile";
+import { Reorder, useDragControls } from "framer-motion";
 
 interface TimelineProps {
   groupedQuests: Record<number, Quest[]>;
@@ -18,6 +20,7 @@ interface TimelineProps {
   onDeleteQuest?: (id: string) => void;
   onSkipQuest?: (id: string) => void;
   onUpdateQuest?: (id: string, newTitle: string) => void;
+  onReorder?: (termIndex: number, newQuests: Quest[]) => void; // 並べ替えコールバック
   currentTerm?: number; // 現在のタームを受け取るプロパティ
 }
 
@@ -32,6 +35,7 @@ export const Timeline = ({
   onDeleteQuest,
   onSkipQuest,
   onUpdateQuest,
+  onReorder,
   currentTerm,
 }: TimelineProps) => {
   const terms = [
@@ -234,18 +238,15 @@ export const Timeline = ({
                     >
                       <VStack align="stretch" gap={1}>
                         {/* クエスト一覧 */}
-                        {groupedQuests[originalIndex + dayOffset * 5]?.map(
-                          (quest) => (
-                            <QuestItem
-                              key={quest.id}
-                              quest={quest}
-                              onToggleComplete={onToggleComplete}
-                              onDelete={onDeleteQuest}
-                              onSkip={onSkipQuest}
-                              onUpdate={onUpdateQuest}
-                            />
-                          )
-                        )}
+                        <QuestReorderList
+                          quests={groupedQuests[originalIndex + dayOffset * 5] || []}
+                          termIndex={originalIndex + dayOffset * 5}
+                          onToggleComplete={onToggleComplete}
+                          onDelete={onDeleteQuest}
+                          onSkip={onSkipQuest}
+                          onUpdate={onUpdateQuest}
+                          onReorder={onReorder}
+                        />
 
                         {/* 編集フォーム */}
                         {editingQuest &&

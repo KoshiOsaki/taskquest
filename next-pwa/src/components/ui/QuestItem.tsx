@@ -1,9 +1,10 @@
 "use client";
 
-import { Checkbox, Flex, Input, IconButton } from "@chakra-ui/react";
+import { Checkbox, Flex, Input, IconButton, Box } from "@chakra-ui/react";
 import { Quest } from "../../app/page";
 import { useState, useRef, useEffect } from "react";
-import { FiTrash2, FiSkipForward } from "react-icons/fi";
+import { FiTrash2, FiSkipForward, FiMenu } from "react-icons/fi";
+import { Reorder } from "framer-motion";
 
 interface QuestItemProps {
   quest: Quest;
@@ -11,6 +12,7 @@ interface QuestItemProps {
   onDelete?: (id: string) => void;
   onSkip?: (id: string) => void;
   onUpdate?: (id: string, newTitle: string) => void;
+  dragControls?: any; // framer-motionのdragControlsを受け取る
 }
 
 export const QuestItem = ({
@@ -19,6 +21,7 @@ export const QuestItem = ({
   onDelete,
   onSkip,
   onUpdate,
+  dragControls,
 }: QuestItemProps) => {
   const { id, title, is_done } = quest;
   const [isEditing, setIsEditing] = useState(false);
@@ -67,6 +70,20 @@ export const QuestItem = ({
       opacity={is_done ? 0.6 : 1}
       onClick={(e) => e.stopPropagation()} // 親要素へのイベント伝播を防ぐ
     >
+      {/* ドラッグハンドル */}
+      <Box
+        cursor="grab"
+        _active={{ cursor: "grabbing" }}
+        onPointerDown={(e) => dragControls?.start(e)}
+        p={1}
+        opacity={0.4}
+        _hover={{ opacity: 0.8 }}
+        display="flex"
+        alignItems="center"
+      >
+        <FiMenu size={14} />
+      </Box>
+      
       <Checkbox.Root
         checked={is_done}
         onCheckedChange={(checked) => onToggleComplete?.(id, !!checked.checked)}

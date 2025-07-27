@@ -19,7 +19,7 @@ export interface Quest {
   term?: number;
   category?: string;
   is_done: boolean;
-  order: number; // 並び順
+  quest_order: number; // 並び順
   created_at: string; // timestamptz
 }
 
@@ -41,13 +41,13 @@ export default function Home() {
   const getCurrentTerm = (): number => {
     const now = new Date();
     const hour = now.getHours();
-    
-    if (hour >= 9 && hour < 12) return 0;  // T1: 9-12時
+
+    if (hour >= 9 && hour < 12) return 0; // T1: 9-12時
     if (hour >= 12 && hour < 15) return 1; // T2: 12-15時
     if (hour >= 15 && hour < 18) return 2; // T3: 15-18時
     if (hour >= 18 && hour < 21) return 3; // T4: 18-21時
     if (hour >= 21 && hour < 24) return 4; // T5: 21-24時
-    
+
     // 深夜・早朝は最初のターム（9-12時）を返す
     return 0;
   };
@@ -58,7 +58,7 @@ export default function Home() {
       .select("*")
       // .eq('due_date', new Date().toISOString().split('T')[0]) // 今日のクエストのみ取得する場合
       .order("term", { ascending: true })
-      .order("order", { ascending: true });
+      .order("quest_order", { ascending: true });
     if (error) {
       console.error("Error fetching quests:", error);
     } else if (data) {
@@ -101,17 +101,20 @@ export default function Home() {
       return;
     }
 
-    // 同じtermの最大orderを取得
+    // 同じtermの最大quest_orderを取得
     const { data: maxOrderData } = await supabase
       .from("quests")
-      .select("order")
+      .select("quest_order")
       .eq("term", term)
       .eq("user_id", user.id)
-      .order("order", { ascending: false })
+      .order("quest_order", { ascending: false })
       .limit(1);
 
-    // 最大orderに+1した値を使用（存在しない場合は0から開始）
-    const newOrder = maxOrderData && maxOrderData.length > 0 ? maxOrderData[0].order + 1 : 0;
+    // 最大quest_orderに+1した値を使用（存在しない場合は0から開始）
+    const newOrder =
+      maxOrderData && maxOrderData.length > 0
+        ? maxOrderData[0].quest_order + 1
+        : 0;
 
     const { error } = await supabase.from("quests").insert([
       {
@@ -120,7 +123,7 @@ export default function Home() {
         due_date: new Date().toISOString().split("T")[0], // 今日の日付
         term,
         is_done: false,
-        order: newOrder,
+        quest_order: newOrder,
       },
     ]);
 
@@ -151,14 +154,17 @@ export default function Home() {
 
   const handleDeleteQuest = async (id: string) => {
     // 削除するクエストの情報を取得
-    const { data: questToDelete } = await supabase
+    const { data: questToDelete, error: fetchQuestError } = await supabase
       .from("quests")
       .select("*")
       .eq("id", id)
       .single();
 
-    if (!questToDelete) {
-      console.error("Quest not found");
+    if (fetchQuestError || !questToDelete) {
+      console.error(
+        "Quest not found or error fetching quest:",
+        fetchQuestError
+      );
       return;
     }
 
@@ -170,37 +176,64 @@ export default function Home() {
       return;
     }
 
-    // 同じtermの、削除したクエストより大きいorderを持つクエストを取得
+    // 同じtermの、削除したクエストより大きいquest_orderを持つクエストを取得
+
     const { data: questsToUpdate, error: fetchError } = await supabase
       .from("quests")
       .select("*")
       .eq("term", questToDelete.term)
-      .gt("order", questToDelete.order);
-      
+      .gt("quest_order", questToDelete.quest_order);
+
     if (fetchError) {
       console.error("Error fetching quests to update:", fetchError);
       return;
     }
-    
-    // 各クエストのorderを1つ減らす
+
+    // questsToUpdateがnullまたは空配列の場合は、更新するクエストがない
+    if (!questsToUpdate || questsToUpdate.length === 0) {
+      fetchQuests(); // クエスト一覧を再取得
+      return;
+    }
+
+    // 各クエストのquest_orderを1つ減らす
     if (questsToUpdate && questsToUpdate.length > 0) {
-      const updatePromises = questsToUpdate.map(quest => {
+      const updatePromises = questsToUpdate.map((quest) => {
         return supabase
           .from("quests")
-          .update({ order: quest.order - 1 })
+          .update({ quest_order: quest.quest_order - 1 })
           .eq("id", quest.id);
       });
-      
+
       // すべての更新を並行して実行
       const updateResults = await Promise.all(updatePromises);
-      const updateError = updateResults.find(result => result.error);
-      
+      const updateError = updateResults.find((result) => result.error);
+
       if (updateError) {
-        console.error("Error updating orders:", updateError);
+        console.error("Error updating quest_orders:", updateError);
       }
     }
 
     fetchQuests();
+  };
+
+  const handleReorder = async (termIndex: number, newQuests: Quest[]) => {
+    // 新しい順序でquest_orderを更新
+    const updatePromises = newQuests.map((quest, index) => {
+      return supabase
+        .from("quests")
+        .update({ quest_order: index })
+        .eq("id", quest.id);
+    });
+
+    const updateResults = await Promise.all(updatePromises);
+    const updateError = updateResults.find((result) => result.error);
+
+    if (updateError) {
+      console.error("Error updating quest_order:", updateError);
+    } else {
+      // 成功した場合、クエストを再取得
+      fetchQuests();
+    }
   };
 
   const handleSkipQuest = async (id: string) => {
@@ -266,19 +299,14 @@ export default function Home() {
           onDeleteQuest={handleDeleteQuest}
           onSkipQuest={handleSkipQuest}
           onUpdateQuest={handleUpdateQuest}
+          onReorder={handleReorder}
           currentTerm={currentTerm} // 現在のタームを渡す
         />
         <Footer />
       </Box>
       {/* メモ機能 */}
-      <MemoTab 
-        onClick={() => setIsMemoOpen(true)} 
-        isExpanded={isMemoOpen}
-      />
-      <MemoDrawer 
-        isOpen={isMemoOpen} 
-        onClose={() => setIsMemoOpen(false)} 
-      />
+      <MemoTab onClick={() => setIsMemoOpen(true)} isExpanded={isMemoOpen} />
+      <MemoDrawer isOpen={isMemoOpen} onClose={() => setIsMemoOpen(false)} />
     </Box>
   );
 }
