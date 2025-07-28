@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button, Box, Text } from "@chakra-ui/react";
-import { useAuth } from "../hooks/useAuth";
+import { getCurrentUser } from "../repository/auth";
 import {
   askPermission,
   subscribe,
@@ -11,12 +11,21 @@ import {
 } from "../lib/push-utils";
 
 export default function PushNotificationSetup() {
-  const { user } = useAuth();
+  const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<string>("");
   const [permission, setPermission] =
     useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // ユーザー情報を取得
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { user: currentUser } = await getCurrentUser();
+      setUser(currentUser);
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -64,7 +73,8 @@ export default function PushNotificationSetup() {
   }, [user]);
 
   const handleEnableNotifications = async () => {
-    if (!user) return;
+    const { user: currentUser } = await getCurrentUser();
+    if (!currentUser) return;
 
     setIsLoading(true);
     setStatus("設定中...");
@@ -79,7 +89,7 @@ export default function PushNotificationSetup() {
       const subscription = await subscribe();
 
       // Supabaseに保存
-      await saveSubscription(subscription, user.id);
+      await saveSubscription(subscription, currentUser.id);
 
       setIsSubscribed(true);
       setStatus("プッシュ通知が有効になりました！");

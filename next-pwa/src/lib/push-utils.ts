@@ -1,8 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+import { saveSubscription as saveSubscriptionRepo, deleteSubscription } from '../repository/push-notification'
 
 // VAPID公開鍵（環境変数から取得）
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
@@ -35,14 +31,9 @@ export async function subscribe() {
  * 購読情報をSupabaseに保存する
  */
 export async function saveSubscription(subscription: PushSubscription, userId: string) {
-  const { error } = await supabase
-    .from('push_subscriptions')
-    .upsert({
-      user_id: userId,
-      subscription,        // そのまま JSON 化される
-      created_at: new Date(),
-    })
-  if (error) console.error('保存失敗', error)
+  const { error } = await saveSubscriptionRepo(subscription, userId);
+  if (error) console.error('保存失敗', error);
+  return { error };
 }
 
 /**
@@ -61,10 +52,7 @@ export async function unsubscribe(userId: string): Promise<void> {
   }
 
   // Supabaseからも削除
-  const { error } = await supabase
-    .from('push_subscriptions')
-    .delete()
-    .eq('user_id', userId);
+  const { error } = await deleteSubscription(userId);
 
   if (error) {
     console.error('購読情報の削除に失敗しました:', error);

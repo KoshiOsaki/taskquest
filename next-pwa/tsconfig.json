@@ -6,7 +6,11 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    // Path alias for imports
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "next-env.d.ts",

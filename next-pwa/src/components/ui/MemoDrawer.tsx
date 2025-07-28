@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Drawer, CloseButton, Portal, Textarea, Text } from "@chakra-ui/react";
-import { supabase } from "../../lib/supabase/client";
+import { fetchLatestMemo, saveMemo as saveMemoRepo } from "../../repository/memo";
+import { getCurrentUser } from "../../repository/auth";
 
 interface Memo {
   id: string;
@@ -26,34 +27,12 @@ export const MemoDrawer: React.FC<MemoDrawerProps> = ({ isOpen, onClose }) => {
   // メモの保存関数
   const saveMemo = useCallback(async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data, error } = await saveMemoRepo(content, memo?.id);
 
-      if (memo) {
-        // 既存のメモを更新
-        const { error } = await supabase
-          .from("memos")
-          .update({ content })
-          .eq("id", memo.id);
-
-        if (error) {
-          console.error("Error updating memo:", error);
-        }
-      } else {
-        // 新しいメモを作成
-        const { data, error } = await supabase
-          .from("memos")
-          .insert({ user_id: user.id, content })
-          .select()
-          .single();
-
-        if (error) {
-          console.error("Error creating memo:", error);
-        } else if (data) {
-          setMemo(data);
-        }
+      if (error) {
+        console.error("Error saving memo:", error);
+      } else if (data) {
+        setMemo(data);
       }
     } catch (error) {
       console.error("Error saving memo:", error);
@@ -64,20 +43,9 @@ export const MemoDrawer: React.FC<MemoDrawerProps> = ({ isOpen, onClose }) => {
   const fetchMemo = useCallback(async () => {
     setIsLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data, error } = await fetchLatestMemo();
 
-      const { data, error } = await supabase
-        .from("memos")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
+      if (error) {
         console.error("Error fetching memo:", error);
       } else if (data) {
         setMemo(data);
