@@ -7,8 +7,19 @@ import { Footer } from "../components/ui/Footer";
 import { Timeline } from "../components/ui/Timeline";
 import { MemoDrawer } from "../components/ui/MemoDrawer";
 import { MemoTab } from "../components/ui/MemoTab";
-import { Quest, fetchQuests as fetchQuestsRepo, addQuest as addQuestRepo, toggleQuestComplete, deleteQuest, updateQuestOrdersAfterDelete, reorderQuests, skipQuest, updateQuestTitle } from "../repository/quest";
+import {
+  Quest,
+  fetchQuests as fetchQuestsRepo,
+  addQuest as addQuestRepo,
+  toggleQuestComplete,
+  deleteQuest,
+  updateQuestOrdersAfterDelete,
+  reorderQuests,
+  skipQuest,
+  updateQuestTitle,
+} from "../repository/quest";
 import { getCurrentUser } from "../repository/auth";
+import { getCurrentTerm } from "@/lib/term";
 
 export default function Home() {
   const [groupedQuests, setGroupedQuests] = useState<Record<number, Quest[]>>(
@@ -23,21 +34,6 @@ export default function Home() {
   useEffect(() => {
     fetchQuests();
   }, []);
-
-  // 現在の時刻から現在のタームを算出する関数
-  const getCurrentTerm = (): number => {
-    const now = new Date();
-    const hour = now.getHours();
-
-    if (hour >= 9 && hour < 12) return 0; // T1: 9-12時
-    if (hour >= 12 && hour < 15) return 1; // T2: 12-15時
-    if (hour >= 15 && hour < 18) return 2; // T3: 15-18時
-    if (hour >= 18 && hour < 21) return 3; // T4: 18-21時
-    if (hour >= 21 && hour < 24) return 4; // T5: 21-24時
-
-    // 深夜・早朝は最初のターム（9-12時）を返す
-    return 0;
-  };
 
   const fetchQuests = async () => {
     const { data, error } = await fetchQuestsRepo();
@@ -55,10 +51,6 @@ export default function Home() {
       }, {} as Record<number, Quest[]>);
       setGroupedQuests(grouped);
     }
-  };
-
-  const handleSave = (title: string, term: number) => {
-    addQuest(title, term);
   };
 
   const handleSaveAndNew = (title: string, term: number) => {
@@ -150,7 +142,11 @@ export default function Home() {
 
     if (!currentQuest) return;
 
-    const { error } = await skipQuest(id, currentQuest.term || 0, currentQuest.due_date);
+    const { error } = await skipQuest(
+      id,
+      currentQuest.term || 0,
+      currentQuest.due_date
+    );
 
     if (error) {
       console.error("Error skipping quest:", error);
@@ -188,7 +184,7 @@ export default function Home() {
           groupedQuests={groupedQuests}
           editingQuest={editingQuest}
           onTermClick={(term) => setEditingQuest({ term, title: "" })}
-          onSave={handleSave}
+          onSave={(title, term) => addQuest(title, term)}
           onCancel={() => setEditingQuest(null)}
           onSaveAndNew={handleSaveAndNew}
           onToggleComplete={handleToggleComplete}
