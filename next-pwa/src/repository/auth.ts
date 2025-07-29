@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { User, Provider, AuthResponse } from '@supabase/supabase-js';
+import type { User, Provider } from '@supabase/supabase-js';
 
 /**
  * 現在のユーザー情報を取得する

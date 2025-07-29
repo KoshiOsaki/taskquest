@@ -1,7 +1,7 @@
 "use client";
 
 import { Reorder, useDragControls } from "framer-motion";
-import { Quest } from "../../app/page";
+import { Quest } from "@/repository/quest";
 import { QuestItem } from "./QuestItem";
 
 interface QuestReorderItemProps {

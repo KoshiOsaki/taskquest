@@ -1,7 +1,8 @@
 "use client";
 
+import { Quest } from "@/repository/quest";
 import { Checkbox, Flex, Input, IconButton, Box } from "@chakra-ui/react";
-import { Quest } from "../../app/page";
+
 import { useState, useRef, useEffect } from "react";
 import { FiTrash2, FiSkipForward, FiMenu } from "react-icons/fi";
 

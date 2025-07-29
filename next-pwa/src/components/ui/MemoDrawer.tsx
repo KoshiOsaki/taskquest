@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Drawer, CloseButton, Portal, Textarea, Text } from "@chakra-ui/react";
-import { fetchLatestMemo, saveMemo as saveMemoRepo } from "../../repository/memo";
-import { getCurrentUser } from "../../repository/auth";
+import {
+  fetchLatestMemo,
+  saveMemo as saveMemoRepo,
+} from "../../repository/memo";
 
 interface Memo {
   id: string;
