@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Box } from "@chakra-ui/react";
-import { Header } from "../components/ui/Header";
+import { BottomFloat } from "../components/ui/BottomFloat";
 import { Footer } from "../components/ui/Footer";
 import { Timeline } from "../components/ui/Timeline";
 import { MemoDrawer } from "../components/ui/MemoDrawer";
@@ -203,7 +203,7 @@ export default function Home() {
 
   return (
     <Box maxW="sm" mx="auto" bg="gradient.primary" minH="100vh" p={4}>
-      <Header />
+      <BottomFloat />
       <Box
         position="relative"
         mt="60px"

@@ -85,13 +85,6 @@ export const QuestItem = ({
         <FiMenu size={14} />
       </Box>
 
-      <Checkbox.Root
-        checked={is_done}
-        onCheckedChange={(checked) => onToggleComplete?.(id, !!checked.checked)}
-      >
-        <Checkbox.Indicator />
-      </Checkbox.Root>
-
       {isEditing ? (
         <Input
           ref={inputRef}
@@ -128,6 +121,17 @@ export const QuestItem = ({
           _focus={{ boxShadow: "none" }}
         />
       )}
+
+      <Checkbox.Root
+        defaultChecked={is_done}
+        onChange={() => onToggleComplete?.(id, !is_done)}
+        size="md"
+        colorScheme="green"
+        mr={2}
+      >
+        <Checkbox.HiddenInput />
+        <Checkbox.Control borderRadius="full" />
+      </Checkbox.Root>
 
       <IconButton
         aria-label="次のタームにスキップ"

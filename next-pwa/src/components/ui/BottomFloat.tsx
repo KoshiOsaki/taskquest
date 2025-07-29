@@ -5,7 +5,7 @@ import LoginButton from "./LoginButton";
 import UserProfile from "./UserProfile";
 import { useAuth } from "../../hooks/useAuth";
 
-export const Header = () => {
+export const BottomFloat = () => {
   const { user } = useAuth();
 
   return (
