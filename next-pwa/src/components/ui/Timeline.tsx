@@ -309,27 +309,13 @@ export const Timeline = ({
                         />
 
                         {/* 編集フォーム */}
-                        {(() => {
-                          console.log(
-                            "フォーム表示条件チェック:",
-                            editingQuest,
-                            term.termNumber - 1,
-                            editingQuest &&
-                              editingQuest.term === term.termNumber - 1
-                          );
-                          return null;
-                        })()}
                         {editingQuest &&
-                          editingQuest.term === term.termNumber - 1 && (
+                          editingQuest.term === term.termNumber - 1 &&
+                          editingQuest.date ===
+                            date.toISOString().split("T")[0] && (
                             <QuestInputForm
                               title={editingQuest.title}
                               onSave={(newTitle) => {
-                                console.log(
-                                  "onSave",
-                                  newTitle,
-                                  term.termNumber - 1,
-                                  date.toISOString().split("T")[0]
-                                );
                                 onSave(
                                   newTitle,
                                   term.termNumber - 1,
@@ -357,11 +343,6 @@ export const Timeline = ({
                             opacity={0.4}
                             _hover={{ opacity: 0.8 }}
                             onClick={() => {
-                              console.log(
-                                "onAddQuest",
-                                term.termNumber - 1,
-                                date.toISOString().split("T")[0]
-                              );
                               onAddQuest(
                                 term.termNumber - 1,
                                 date.toISOString().split("T")[0]
