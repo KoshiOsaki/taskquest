@@ -1,17 +1,18 @@
 "use client";
 
 import { Box, Text, VStack, HStack, Button } from "@chakra-ui/react";
-import { Quest } from "../../app/page";
+import { Quest } from "../../repository/quest";
 import { QuestInputForm } from "./QuestInputForm";
 import { QuestReorderList } from "./QuestReorderList";
 import { FiPlus } from "react-icons/fi";
 import UserProfile from "./UserProfile";
+import { RefObject } from "react";
 
 interface TimelineProps {
-  groupedQuests: Record<number, Quest[]>;
+  groupedQuests: Record<string, Quest[]>; // 日付_タームをキーとするレコード
   editingQuest: { term: number; title: string } | null;
-  onTermClick: (termIndex: number) => void;
-  onSave: (newTitle: string, term: number) => void;
+  onTermClick: (dateTermKey: string) => void;
+  onSave: (newTitle: string, dateTermKey: string) => void;
   onCancel: () => void;
   onSaveAndNew: (newTitle: string, term: number) => void;
   onToggleComplete?: (id: string, completed: boolean) => void;
@@ -20,6 +21,8 @@ interface TimelineProps {
   onUpdateQuest?: (id: string, newTitle: string) => void;
   onReorder?: (termIndex: number, newQuests: Quest[]) => void; // 並べ替えコールバック
   currentTerm?: number; // 現在のタームを受け取るプロパティ
+  currentDate?: string; // 現在の日付（YYYY-MM-DD形式）
+  termRef?: RefObject<HTMLDivElement | null>; // 現在のタームへのスクロール用ref
 }
 
 export const Timeline = ({
@@ -35,19 +38,45 @@ export const Timeline = ({
   onUpdateQuest,
   onReorder,
   currentTerm,
+  currentDate,
+  termRef,
 }: TimelineProps) => {
   const terms = [
-    { name: "9-12", startHour: 9, endHour: 12 },
-    { name: "12-15", startHour: 12, endHour: 15 },
-    { name: "15-18", startHour: 15, endHour: 18 },
-    { name: "18-21", startHour: 18, endHour: 21 },
-    { name: "21-24", startHour: 21, endHour: 24 },
+    { name: "6-9", startHour: 6, endHour: 9, termNumber: 1 },
+    { name: "9-12", startHour: 9, endHour: 12, termNumber: 2 },
+    { name: "12-15", startHour: 12, endHour: 15, termNumber: 3 },
+    { name: "15-18", startHour: 15, endHour: 18, termNumber: 4 },
+    { name: "18-21", startHour: 18, endHour: 21, termNumber: 5 },
+    { name: "21-24", startHour: 21, endHour: 24, termNumber: 6 },
   ];
 
-  // 今日と明日の日付を生成
+  // 前日から3日後までの日付を生成
   const today = new Date();
+
+  // 前日
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  // 明日
   const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setDate(today.getDate() + 1);
+
+  // 明後日
+  const dayAfterTomorrow = new Date(today);
+  dayAfterTomorrow.setDate(today.getDate() + 2);
+
+  // 3日後
+  const threeDaysLater = new Date(today);
+  threeDaysLater.setDate(today.getDate() + 3);
+
+  // 表示する日付の配列
+  const displayDates = [
+    yesterday,
+    today,
+    tomorrow,
+    dayAfterTomorrow,
+    threeDaysLater,
+  ];
 
   const formatDate = (date: Date) => {
     return `${date.getFullYear()}年${
@@ -97,6 +126,34 @@ export const Timeline = ({
     // 現在時刻がタームの範囲外の場合は-1を返す
     return -1;
   };
+
+  // 現在の日付を文字列で取得
+  const todayDateString = today.toISOString().split("T")[0];
+
+  // 現在は使用していないのでコメントアウト
+  // const displayCurrentDate = currentDate || todayDateString;
+
+  // 日付文字列からDateオブジェクトを作成
+  // 現在は使用していないのでコメントアウト
+  // const parseDate = (dateString: string): Date => {
+  //   const [year, month, day] = dateString.split('-').map(Number);
+  //   return new Date(year, month - 1, day); // 月は0始まりなので-1する
+  // };
+
+  // 日付が同じかどうかを判定する関数は使用しなくなったのでコメントアウト
+  // const isSameDate = (date1: Date, date2: Date): boolean => {
+  //   return (
+  //     date1.getFullYear() === date2.getFullYear() &&
+  //     date1.getMonth() === date2.getMonth() &&
+  //     date1.getDate() === date2.getDate()
+  //   );
+  // };
+
+  // 日付文字列が今日かどうかを判定
+  // const isToday = (dateString: string): boolean => {
+  //   const date = parseDate(dateString);
+  //   return isSameDate(date, today);
+  // };
 
   // カスタムレンダリング関数を作成
   const renderCustomDaySection = (date: Date, dayOffset: number) => {
@@ -148,44 +205,52 @@ export const Timeline = ({
                   {/* クエストエリア */}
                   <HStack align="stretch" gap={0} position="relative">
                     {/* 現在時刻を示す赤い横線とプロフィールアイコン */}
-                    {originalIndex === currentTerm && (
-                      <>
-                        <Box
-                          position="absolute"
-                          left="0"
-                          right="0"
-                          height="2px"
-                          bg="red.500"
-                          zIndex={2}
-                          top={`${
-                            calculateTimePosition(
-                              term.startHour,
-                              term.endHour
-                            ) * 100
-                          }%`}
-                        />
-                        {/* プロフィールアイコンを赤線の左に表示 */}
-                        <Box
-                          position="absolute"
-                          left="-16px"
-                          zIndex={3}
-                          top={`${
-                            calculateTimePosition(
-                              term.startHour,
-                              term.endHour
-                            ) * 100
-                          }%`}
-                          transform="translateY(-50%)"
-                          animation="pulse 2s infinite ease-in-out"
-                          width="32px"
-                          height="32px"
-                        >
-                          <Box transform="scale(0.7)">
-                            <UserProfile />
+                    {/* 現在の日付と一致する場合のみ表示 */}
+                    {originalIndex === currentTerm &&
+                      date.toISOString().split("T")[0] ===
+                        (currentDate || todayDateString) && (
+                        <>
+                          <Box
+                            position="absolute"
+                            left="0"
+                            right="0"
+                            height="2px"
+                            bg="red.500"
+                            zIndex={2}
+                            top={`${
+                              calculateTimePosition(
+                                term.startHour,
+                                term.endHour
+                              ) * 100
+                            }%`}
+                          />
+                          {/* プロフィールアイコンを赤線の左に表示 */}
+                          <Box
+                            position="absolute"
+                            left="-16px"
+                            zIndex={3}
+                            top={`${
+                              calculateTimePosition(
+                                term.startHour,
+                                term.endHour
+                              ) * 100
+                            }%`}
+                            transform="translateY(-50%)"
+                            animation="pulse 2s infinite ease-in-out"
+                            width="32px"
+                            height="32px"
+                            ref={
+                              term.termNumber - 1 === currentTerm
+                                ? termRef
+                                : undefined
+                            }
+                          >
+                            <Box transform="scale(0.7)">
+                              <UserProfile />
+                            </Box>
                           </Box>
-                        </Box>
-                      </>
-                    )}
+                        </>
+                      )}
                     {/* 左側のタイムラインバー */}
                     <Box
                       w="12px"
@@ -226,7 +291,13 @@ export const Timeline = ({
                       p={2}
                       cursor="pointer"
                       transition="all 0.2s ease"
-                      onClick={() => onTermClick(originalIndex + dayOffset * 5)}
+                      onClick={() => {
+                        // 日付とタームを結合した文字列キーを作成
+                        const dateTermKey = `${
+                          date.toISOString().split("T")[0]
+                        }_${term.termNumber - 1}`;
+                        onTermClick(dateTermKey);
+                      }}
                       _hover={{
                         bg: "soft.blue",
                         borderColor: "pop.blue",
@@ -238,9 +309,13 @@ export const Timeline = ({
                         {/* クエスト一覧 */}
                         <QuestReorderList
                           quests={
-                            groupedQuests[originalIndex + dayOffset * 5] || []
+                            groupedQuests[
+                              `${date.toISOString().split("T")[0]}_${
+                                term.termNumber - 1
+                              }`
+                            ] || []
                           }
-                          termIndex={originalIndex + dayOffset * 5}
+                          termIndex={term.termNumber - 1}
                           onToggleComplete={onToggleComplete}
                           onDelete={onDeleteQuest}
                           onSkip={onSkipQuest}
@@ -250,27 +325,25 @@ export const Timeline = ({
 
                         {/* 編集フォーム */}
                         {editingQuest &&
-                          editingQuest.term ===
-                            originalIndex + dayOffset * 5 && (
+                          editingQuest.term === term.termNumber - 1 && (
                             <QuestInputForm
                               title={editingQuest.title}
-                              onSave={(newTitle) =>
-                                onSave(newTitle, originalIndex + dayOffset * 5)
-                              }
+                              onSave={(newTitle) => {
+                                const dateTermKey = `${
+                                  date.toISOString().split("T")[0]
+                                }_${term.termNumber - 1}`;
+                                onSave(newTitle, dateTermKey);
+                              }}
                               onCancel={onCancel}
-                              onSaveAndNew={(newTitle) =>
-                                onSaveAndNew(
-                                  newTitle,
-                                  originalIndex + dayOffset * 5
-                                )
-                              }
+                              onSaveAndNew={(newTitle) => {
+                                onSaveAndNew(newTitle, term.termNumber - 1);
+                              }}
                             />
                           )}
 
                         {/* 追加ボタン */}
                         {(!editingQuest ||
-                          editingQuest.term !==
-                            originalIndex + dayOffset * 5) && (
+                          editingQuest.term !== term.termNumber - 1) && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -278,9 +351,13 @@ export const Timeline = ({
                             h="8"
                             opacity={0.4}
                             _hover={{ opacity: 0.8 }}
-                            onClick={() =>
-                              onTermClick(originalIndex + dayOffset * 5)
-                            }
+                            onClick={() => {
+                              // 日付とタームを結合した文字列キーを作成
+                              const dateTermKey = `${
+                                date.toISOString().split("T")[0]
+                              }_${term.termNumber - 1}`;
+                              onTermClick(dateTermKey);
+                            }}
                           >
                             <FiPlus size={16} />
                           </Button>
@@ -311,8 +388,11 @@ export const Timeline = ({
 
   return (
     <Box>
-      {renderCustomDaySection(today, 0)}
-      {renderCustomDaySection(tomorrow, 1)}
+      {displayDates.map((date, index) => (
+        <Box key={date.toISOString()}>
+          {renderCustomDaySection(date, index)}
+        </Box>
+      ))}
     </Box>
   );
 };

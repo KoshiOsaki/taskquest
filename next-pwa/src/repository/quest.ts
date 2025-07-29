@@ -16,13 +16,26 @@ export interface Quest {
 
 /**
  * クエスト一覧を取得する
+ * @param fromDate 取得開始日（YYYY-MM-DD形式）
+ * @param toDate 取得終了日（YYYY-MM-DD形式）
  */
-export const fetchQuests = async () => {
-  const { data, error } = await supabase
+export const fetchQuests = async (fromDate?: string, toDate?: string) => {
+  let query = supabase
     .from('quests')
     .select('*')
+    .order('due_date', { ascending: true })
     .order('term', { ascending: true })
     .order('quest_order', { ascending: true });
+
+  // 日付範囲が指定されている場合、フィルタリングを適用
+  if (fromDate) {
+    query = query.gte('due_date', fromDate);
+  }
+  if (toDate) {
+    query = query.lte('due_date', toDate);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching quests:', error);

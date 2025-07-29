@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box } from "@chakra-ui/react";
 import { Header } from "../components/ui/Header";
 import { Footer } from "../components/ui/Footer";
@@ -19,7 +19,8 @@ import {
   updateQuestTitle,
 } from "../repository/quest";
 import { getCurrentUser } from "../repository/auth";
-import { getCurrentTerm } from "@/lib/term";
+import { getCurrentTerm, getDateRange } from "@/lib/term";
+import dayjs from "dayjs";
 
 export default function Home() {
   const [groupedQuests, setGroupedQuests] = useState<Record<number, Quest[]>>(
@@ -31,24 +32,48 @@ export default function Home() {
   } | null>(null);
   const [isMemoOpen, setIsMemoOpen] = useState(false);
 
+  // 現在の日付とタームの両方にスクロールするために使用
+  const currentTermRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    fetchQuests();
+    // 初期データ取得
+    const dateRange = getDateRange();
+    fetchQuests(dateRange.from, dateRange.to);
   }, []);
 
-  const fetchQuests = async () => {
-    const { data, error } = await fetchQuestsRepo();
+  // 現在の日付とタームにスクロールする
+  useEffect(() => {
+    // データ取得後、少し遅延させてスクロール
+    const timer = setTimeout(() => {
+      if (currentTermRef.current) {
+        currentTermRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [groupedQuests]);
+
+  const fetchQuests = async (fromDate?: string, toDate?: string) => {
+    const { data, error } = await fetchQuestsRepo(fromDate, toDate);
     if (error) {
       console.error("Error fetching quests:", error);
     } else if (data) {
-      // クエストをtermごとにグループ化
+      // クエストを日付とタームでグループ化
       const grouped = data.reduce((acc, quest) => {
-        const term = quest.term ?? -1;
-        if (!acc[term]) {
-          acc[term] = [];
+        // 日付とタームを組み合わせたキーを作成
+        // 例: "2023-07-28_1" (2023-07-28の第1ターム)
+        const dateTermKey = `${quest.due_date}_${quest.term ?? -1}`;
+
+        if (!acc[dateTermKey]) {
+          acc[dateTermKey] = [];
         }
-        acc[term].push(quest);
+        acc[dateTermKey].push(quest);
         return acc;
-      }, {} as Record<number, Quest[]>);
+      }, {} as Record<string, Quest[]>);
+
       setGroupedQuests(grouped);
     }
   };
@@ -165,8 +190,9 @@ export default function Home() {
     }
   };
 
-  // アプリ起動時に現在のタームを取得
+  // アプリ起動時に現在の日付とタームを取得
   const currentTerm = getCurrentTerm();
+  const today = dayjs().format("YYYY-MM-DD");
 
   return (
     <Box maxW="sm" mx="auto" bg="gradient.primary" minH="100vh" p={4}>
@@ -183,8 +209,18 @@ export default function Home() {
         <Timeline
           groupedQuests={groupedQuests}
           editingQuest={editingQuest}
-          onTermClick={(term) => setEditingQuest({ term, title: "" })}
-          onSave={(title, term) => addQuest(title, term)}
+          onTermClick={(dateTermKey: string) => {
+            // dateTermKey から term 部分を抽出
+            const termPart = dateTermKey.split("_")[1];
+            const term = parseInt(termPart);
+            setEditingQuest({ term: term, title: "" });
+          }}
+          onSave={(title: string, dateTermKey: string) => {
+            // dateTermKey から term 部分を抽出
+            const termPart = dateTermKey.split("_")[1];
+            const term = parseInt(termPart);
+            addQuest(title, term);
+          }}
           onCancel={() => setEditingQuest(null)}
           onSaveAndNew={handleSaveAndNew}
           onToggleComplete={handleToggleComplete}
@@ -193,6 +229,8 @@ export default function Home() {
           onUpdateQuest={handleUpdateQuest}
           onReorder={handleReorder}
           currentTerm={currentTerm} // 現在のタームを渡す
+          currentDate={today} // 現在の日付を渡す
+          termRef={currentTermRef} // 現在のタームにスクロールするためのref
         />
         <Footer />
       </Box>
