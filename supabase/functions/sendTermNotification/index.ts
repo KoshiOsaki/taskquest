@@ -97,11 +97,16 @@ Deno.serve(async req => {
         { headers: { ...cors, "Content-Type": "application/json" } });
     }
 
-    const payload = JSON.stringify({
+    // オブジェクトとして定義
+    const payloadObj = JSON.stringify({
       title: `${term} 終了です！！！`,
-      options: { tag: `term-end-${term}`, renotify: true, vibrate: [200, 100, 200] },
+      body: "お疲れさまでした。次のタームを始めましょう。",
+      options: {
+        tag: `term-end-${term}`,
+        vibrate: [200, 100, 200],
+      },
     });
-
+    
     let ok = 0, ng = 0;
     for (let i = 0; i < 7; i++) {
       const results = await Promise.allSettled(
