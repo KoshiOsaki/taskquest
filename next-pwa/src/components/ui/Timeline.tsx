@@ -356,16 +356,19 @@ export const Timeline = ({
                     </Box>
                   </HStack>
 
-                  {/* 終了時刻表示 */}
+                  {/* 終了時刻表示 - 3:00の場合は非表示 */}
+
                   <HStack
                     gap={2}
                     mt={1}
                     mb={sortedIndex < TERMS.length - 1 ? 2 : 0}
                   >
                     <Box w="12px" display="flex" justifyContent="center"></Box>
-                    <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                      {term.endHour}:00
-                    </Text>
+                    {term.endHour !== 3 && (
+                      <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                        {term.endHour}:00
+                      </Text>
+                    )}
                   </HStack>
                 </Box>
               );
