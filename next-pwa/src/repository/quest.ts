@@ -51,7 +51,8 @@ export const fetchQuests = async (fromDate?: string, toDate?: string) => {
 export const addQuest = async (
   title: string,
   term: number,
-  userId: string
+  userId: string,
+  date: string // 日付パラメータを追加
 ) => {
   // 同じtermの最大quest_orderを取得
   const { data: maxOrderData } = await supabase
@@ -72,7 +73,7 @@ export const addQuest = async (
     {
       title,
       user_id: userId,
-      due_date: new Date().toISOString().split('T')[0], // 今日の日付
+      due_date: date, // 引数で受け取った日付を使用
       term,
       is_done: false,
       quest_order: newOrder,

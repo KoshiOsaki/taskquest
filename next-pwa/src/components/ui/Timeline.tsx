@@ -7,14 +7,15 @@ import { QuestReorderList } from "./QuestReorderList";
 import { FiPlus } from "react-icons/fi";
 import UserProfile from "./UserProfile";
 import { RefObject } from "react";
+import { calculateTimePosition } from "@/lib/term";
 
 interface TimelineProps {
   groupedQuests: Record<string, Quest[]>; // 日付_タームをキーとするレコード
-  editingQuest: { term: number; title: string } | null;
-  onTermClick: (dateTermKey: string) => void;
-  onSave: (newTitle: string, dateTermKey: string) => void;
+  editingQuest: { term: number; title: string; date: string } | null;
+  onAddQuest: (term: number, date: string) => void;
+  onSave: (newTitle: string, term: number, date: string) => void;
   onCancel: () => void;
-  onSaveAndNew: (newTitle: string, term: number) => void;
+  onSaveAndNew: (newTitle: string, term: number, date: string) => void;
   onToggleComplete?: (id: string, completed: boolean) => void;
   onDeleteQuest?: (id: string) => void;
   onSkipQuest?: (id: string) => void;
@@ -73,7 +74,7 @@ const TERMS = [
 export const Timeline = ({
   groupedQuests,
   editingQuest,
-  onTermClick,
+  onAddQuest,
   onSave,
   onCancel,
   onSaveAndNew,
@@ -120,32 +121,6 @@ export const Timeline = ({
     }月${date.getDate()}日 (${
       ["日", "月", "火", "水", "木", "金", "土"][date.getDay()]
     })`;
-  };
-
-  // 現在時刻がターム内の何割の場所に当たるか計算する関数
-  const calculateTimePosition = (
-    termStartHour: number,
-    termEndHour: number
-  ): number => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-
-    // 現在時刻を小数点以下の時間として表現（例: 14時30分 = 14.5）
-    const currentTimeDecimal = currentHour + currentMinute / 60;
-
-    // タームの開始時刻から終了時刻までの間で、現在時刻が何割の位置にあるか計算
-    if (
-      currentTimeDecimal >= termStartHour &&
-      currentTimeDecimal < termEndHour
-    ) {
-      return (
-        (currentTimeDecimal - termStartHour) / (termEndHour - termStartHour)
-      );
-    }
-
-    // 現在時刻がタームの範囲外の場合は-1を返す
-    return -1;
   };
 
   // 現在の日付を文字列で取得
@@ -303,11 +278,10 @@ export const Timeline = ({
                       cursor="pointer"
                       transition="all 0.2s ease"
                       onClick={() => {
-                        // 日付とタームを結合した文字列キーを作成
-                        const dateTermKey = `${
+                        onAddQuest(
+                          term.termNumber - 1,
                           date.toISOString().split("T")[0]
-                        }_${term.termNumber - 1}`;
-                        onTermClick(dateTermKey);
+                        );
                       }}
                       _hover={{
                         bg: "soft.blue",
@@ -335,26 +309,46 @@ export const Timeline = ({
                         />
 
                         {/* 編集フォーム */}
+                        {(() => {
+                          console.log(
+                            "フォーム表示条件チェック:",
+                            editingQuest,
+                            term.termNumber - 1,
+                            editingQuest &&
+                              editingQuest.term === term.termNumber - 1
+                          );
+                          return null;
+                        })()}
                         {editingQuest &&
                           editingQuest.term === term.termNumber - 1 && (
                             <QuestInputForm
                               title={editingQuest.title}
                               onSave={(newTitle) => {
-                                const dateTermKey = `${
+                                console.log(
+                                  "onSave",
+                                  newTitle,
+                                  term.termNumber - 1,
                                   date.toISOString().split("T")[0]
-                                }_${term.termNumber - 1}`;
-                                onSave(newTitle, dateTermKey);
+                                );
+                                onSave(
+                                  newTitle,
+                                  term.termNumber - 1,
+                                  date.toISOString().split("T")[0]
+                                );
                               }}
                               onCancel={onCancel}
                               onSaveAndNew={(newTitle) => {
-                                onSaveAndNew(newTitle, term.termNumber - 1);
+                                onSaveAndNew(
+                                  newTitle,
+                                  term.termNumber - 1,
+                                  date.toISOString().split("T")[0]
+                                );
                               }}
                             />
                           )}
 
                         {/* 追加ボタン */}
-                        {(!editingQuest ||
-                          editingQuest.term !== term.termNumber - 1) && (
+                        {!editingQuest && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -363,11 +357,15 @@ export const Timeline = ({
                             opacity={0.4}
                             _hover={{ opacity: 0.8 }}
                             onClick={() => {
-                              // 日付とタームを結合した文字列キーを作成
-                              const dateTermKey = `${
+                              console.log(
+                                "onAddQuest",
+                                term.termNumber - 1,
                                 date.toISOString().split("T")[0]
-                              }_${term.termNumber - 1}`;
-                              onTermClick(dateTermKey);
+                              );
+                              onAddQuest(
+                                term.termNumber - 1,
+                                date.toISOString().split("T")[0]
+                              );
                             }}
                           >
                             <FiPlus size={16} />

@@ -29,6 +29,7 @@ export default function Home() {
   const [editingQuest, setEditingQuest] = useState<{
     term: number;
     title: string;
+    date: string; // 日付情報を追加（YYYY-MM-DD形式）
   } | null>(null);
   const [isMemoOpen, setIsMemoOpen] = useState(false);
 
@@ -83,16 +84,17 @@ export default function Home() {
     }
   };
 
-  const handleSaveAndNew = (title: string, term: number) => {
-    addQuest(title, term, () => {
+  const handleSaveAndNew = (title: string, term: number, date: string) => {
+    addQuest(title, term, date, () => {
       // 同じタームで新しい入力を続ける
-      setEditingQuest({ term: term, title: "" });
+      setEditingQuest({ term: term, title: "", date: date });
     });
   };
 
   const addQuest = async (
     title: string,
     term: number,
+    date: string, // 日付情報を追加（YYYY-MM-DD形式）
     onSuccess?: () => void
   ) => {
     const { user, error: userError } = await getCurrentUser();
@@ -101,7 +103,7 @@ export default function Home() {
       return;
     }
 
-    const { error } = await addQuestRepo(title, term, user.id);
+    const { error } = await addQuestRepo(title, term, user.id, date);
 
     if (error) {
       console.error("Error adding quest:", error);
@@ -214,17 +216,11 @@ export default function Home() {
         <Timeline
           groupedQuests={groupedQuests}
           editingQuest={editingQuest}
-          onTermClick={(dateTermKey: string) => {
-            // dateTermKey から term 部分を抽出
-            const termPart = dateTermKey.split("_")[1];
-            const term = parseInt(termPart);
-            setEditingQuest({ term: term, title: "" });
+          onAddQuest={(term: number, date: string) => {
+            setEditingQuest({ term: term, title: "", date: date });
           }}
-          onSave={(title: string, dateTermKey: string) => {
-            // dateTermKey から term 部分を抽出
-            const termPart = dateTermKey.split("_")[1];
-            const term = parseInt(termPart);
-            addQuest(title, term);
+          onSave={(title: string, term: number, date: string) => {
+            addQuest(title, term, date);
           }}
           onCancel={() => setEditingQuest(null)}
           onSaveAndNew={handleSaveAndNew}

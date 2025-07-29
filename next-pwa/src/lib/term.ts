@@ -41,3 +41,30 @@ export const getDateRange = () => {
     today: dayjs(today).format('YYYY-MM-DD')
   };
 };
+
+
+// 現在時刻がターム内の何割の場所に当たるか計算する関数
+export const calculateTimePosition = (
+    termStartHour: number,
+    termEndHour: number
+  ): number => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // 現在時刻を小数点以下の時間として表現（例: 14時30分 = 14.5）
+    const currentTimeDecimal = currentHour + currentMinute / 60;
+
+    // タームの開始時刻から終了時刻までの間で、現在時刻が何割の位置にあるか計算
+    if (
+      currentTimeDecimal >= termStartHour &&
+      currentTimeDecimal < termEndHour
+    ) {
+      return (
+        (currentTimeDecimal - termStartHour) / (termEndHour - termStartHour)
+      );
+    }
+
+    // 現在時刻がタームの範囲外の場合は-1を返す
+    return -1;
+  };
