@@ -25,6 +25,51 @@ interface TimelineProps {
   termRef?: RefObject<HTMLDivElement | null>; // 現在のタームへのスクロール用ref
 }
 
+const TERMS = [
+  {
+    name: "9-12",
+    displayName: "①",
+    startHour: 9,
+    endHour: 12,
+    termNumber: 1,
+  }, // 1: 9-12
+  {
+    name: "12-15",
+    displayName: "②",
+    startHour: 12,
+    endHour: 15,
+    termNumber: 2,
+  }, // 2: 12-15
+  {
+    name: "15-18",
+    displayName: "③",
+    startHour: 15,
+    endHour: 18,
+    termNumber: 3,
+  }, // 3: 15-18
+  {
+    name: "18-21",
+    displayName: "④",
+    startHour: 18,
+    endHour: 21,
+    termNumber: 4,
+  }, // 4: 18-21
+  {
+    name: "21-24",
+    displayName: "⑤",
+    startHour: 21,
+    endHour: 24,
+    termNumber: 5,
+  }, // 5: 21-24
+  {
+    name: "0-3",
+    displayName: "⭐️",
+    startHour: 0,
+    endHour: 3,
+    termNumber: 6,
+  }, // 6: 0-3
+];
+
 export const Timeline = ({
   groupedQuests,
   editingQuest,
@@ -41,15 +86,6 @@ export const Timeline = ({
   currentDate,
   termRef,
 }: TimelineProps) => {
-  const terms = [
-    { name: "6-9", startHour: 6, endHour: 9, termNumber: 1 },
-    { name: "9-12", startHour: 9, endHour: 12, termNumber: 2 },
-    { name: "12-15", startHour: 12, endHour: 15, termNumber: 3 },
-    { name: "15-18", startHour: 15, endHour: 18, termNumber: 4 },
-    { name: "18-21", startHour: 18, endHour: 21, termNumber: 5 },
-    { name: "21-24", startHour: 21, endHour: 24, termNumber: 6 },
-  ];
-
   // 前日から3日後までの日付を生成
   const today = new Date();
 
@@ -86,21 +122,6 @@ export const Timeline = ({
     })`;
   };
 
-  // 現在のタームが一番上に表示されるように並び替え
-  const sortedTerms = [...terms];
-
-  // 現在のタームが指定されている場合、そのタームを一番上に表示
-  if (currentTerm !== undefined) {
-    // 現在のタームを配列から取り出し、先頭に挿入
-    const currentTermData = sortedTerms[currentTerm];
-    if (currentTermData) {
-      // 現在のタームを配列から削除
-      sortedTerms.splice(currentTerm, 1);
-      // 先頭に挿入
-      sortedTerms.unshift(currentTermData);
-    }
-  }
-
   // 現在時刻がターム内の何割の場所に当たるか計算する関数
   const calculateTimePosition = (
     termStartHour: number,
@@ -130,37 +151,23 @@ export const Timeline = ({
   // 現在の日付を文字列で取得
   const todayDateString = today.toISOString().split("T")[0];
 
-  // 現在は使用していないのでコメントアウト
-  // const displayCurrentDate = currentDate || todayDateString;
-
-  // 日付文字列からDateオブジェクトを作成
-  // 現在は使用していないのでコメントアウト
-  // const parseDate = (dateString: string): Date => {
-  //   const [year, month, day] = dateString.split('-').map(Number);
-  //   return new Date(year, month - 1, day); // 月は0始まりなので-1する
-  // };
-
-  // 日付が同じかどうかを判定する関数は使用しなくなったのでコメントアウト
-  // const isSameDate = (date1: Date, date2: Date): boolean => {
-  //   return (
-  //     date1.getFullYear() === date2.getFullYear() &&
-  //     date1.getMonth() === date2.getMonth() &&
-  //     date1.getDate() === date2.getDate()
-  //   );
-  // };
-
-  // 日付文字列が今日かどうかを判定
-  // const isToday = (dateString: string): boolean => {
-  //   const date = parseDate(dateString);
-  //   return isSameDate(date, today);
-  // };
-
   // カスタムレンダリング関数を作成
   const renderCustomDaySection = (date: Date, dayOffset: number) => {
     return (
       <Box key={dayOffset} mb={8}>
         {/* 日付ヘッダー */}
-        <Box py={3} borderBottom="2px solid" borderColor="pop.pink" mb={4}>
+        <Box
+          py={3}
+          mx="-16px"
+          borderBottom="2px solid"
+          borderColor="pop.pink"
+          mb={4}
+          position="sticky"
+          top={0}
+          bg="white"
+          zIndex={10}
+          boxShadow="sm"
+        >
           <Text
             fontSize="lg"
             fontWeight="bold"
@@ -186,16 +193,25 @@ export const Timeline = ({
 
           <VStack align="stretch" gap={0}>
             {/* 最初の時刻表示 */}
-            <HStack gap={2} mb={1} ref={date.toISOString().split("T")[0] === (currentDate || todayDateString) ? termRef : undefined}>
+            <HStack
+              gap={2}
+              mb={1}
+              ref={
+                date.toISOString().split("T")[0] ===
+                (currentDate || todayDateString)
+                  ? termRef
+                  : undefined
+              }
+            >
               <Box w="12px" display="flex" justifyContent="center"></Box>
               <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                {sortedTerms[0].startHour}:00
+                {TERMS[0].startHour}:00
               </Text>
             </HStack>
 
-            {sortedTerms.map((term, sortedIndex) => {
+            {TERMS.map((term, sortedIndex) => {
               // 元のインデックスを特定
-              const originalIndex = terms.findIndex(
+              const originalIndex = TERMS.findIndex(
                 (t) =>
                   t.startHour === term.startHour && t.endHour === term.endHour
               );
@@ -239,7 +255,6 @@ export const Timeline = ({
                             animation="pulse 2s infinite ease-in-out"
                             width="32px"
                             height="32px"
-
                           >
                             <Box transform="scale(0.7)">
                               <UserProfile />
@@ -273,7 +288,7 @@ export const Timeline = ({
                         minW="fit-content"
                         whiteSpace="nowrap"
                       >
-                        T{originalIndex + 1}
+                        {term.displayName}
                       </Text>
                     </Box>
 
@@ -366,7 +381,7 @@ export const Timeline = ({
                   <HStack
                     gap={2}
                     mt={1}
-                    mb={sortedIndex < sortedTerms.length - 1 ? 2 : 0}
+                    mb={sortedIndex < TERMS.length - 1 ? 2 : 0}
                   >
                     <Box w="12px" display="flex" justifyContent="center"></Box>
                     <Text fontSize="xs" color="gray.500" fontWeight="medium">

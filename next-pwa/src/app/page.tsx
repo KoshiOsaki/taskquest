@@ -59,7 +59,7 @@ export default function Home() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [groupedQuests]);
+  }, []);
 
   const fetchQuests = async (fromDate?: string, toDate?: string) => {
     const { data, error } = await fetchQuestsRepo(fromDate, toDate);
