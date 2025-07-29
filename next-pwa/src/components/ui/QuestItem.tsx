@@ -40,6 +40,13 @@ export const QuestItem = ({
     e.stopPropagation(); // 親要素へのイベント伝播を防ぐ
     if (!is_done) {
       setIsEditing(true);
+      // PWA環境でもキーボードが表示されるように、少し遅延させてからフォーカスする
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 10);
     }
   };
 
