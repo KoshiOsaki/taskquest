@@ -117,6 +117,7 @@ export const MemoDrawer: React.FC<MemoDrawerProps> = ({ isOpen, onClose }) => {
             height="70vh"
             borderTopRadius="xl"
             bg="white"
+            color="gray.800"
             style={{
               transform: "translateY(-20vh)", // 画面の10%分上に表示
             }}
