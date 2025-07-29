@@ -13,5 +13,16 @@ export default function LoginButton() {
     });
   };
 
-  return <Button onClick={handleLogin}>Googleでログイン</Button>;
+  return (
+    <Button
+      aria-label="ログイン"
+      onClick={handleLogin}
+      colorScheme="blue"
+      borderRadius="full"
+      size="md"
+      boxShadow="md"
+    >
+      ログイン
+    </Button>
+  );
 }

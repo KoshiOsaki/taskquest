@@ -186,7 +186,7 @@ export const Timeline = ({
 
           <VStack align="stretch" gap={0}>
             {/* 最初の時刻表示 */}
-            <HStack gap={2} mb={1}>
+            <HStack gap={2} mb={1} ref={date.toISOString().split("T")[0] === (currentDate || todayDateString) ? termRef : undefined}>
               <Box w="12px" display="flex" justifyContent="center"></Box>
               <Text fontSize="xs" color="gray.500" fontWeight="medium">
                 {sortedTerms[0].startHour}:00
@@ -239,11 +239,7 @@ export const Timeline = ({
                             animation="pulse 2s infinite ease-in-out"
                             width="32px"
                             height="32px"
-                            ref={
-                              term.termNumber - 1 === currentTerm
-                                ? termRef
-                                : undefined
-                            }
+
                           >
                             <Box transform="scale(0.7)">
                               <UserProfile />

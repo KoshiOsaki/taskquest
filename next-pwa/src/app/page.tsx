@@ -46,9 +46,14 @@ export default function Home() {
     // データ取得後、少し遅延させてスクロール
     const timer = setTimeout(() => {
       if (currentTermRef.current) {
-        currentTermRef.current.scrollIntoView({
+        // 要素の位置を取得
+        const rect = currentTermRef.current.getBoundingClientRect();
+        // ページのスクロール位置 + 要素の位置 - 64pxの余白
+        const scrollTop = window.pageYOffset + rect.top - 96;
+
+        window.scrollTo({
+          top: scrollTop,
           behavior: "smooth",
-          block: "center",
         });
       }
     }, 500);

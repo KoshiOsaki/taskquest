@@ -9,9 +9,10 @@ import {
   saveSubscription,
   getNotificationPermission,
 } from "../lib/push-utils";
+import { User } from "@supabase/supabase-js";
 
 export default function PushNotificationSetup() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<string>("");
   const [permission, setPermission] =
