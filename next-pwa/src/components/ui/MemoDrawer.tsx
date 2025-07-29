@@ -64,6 +64,12 @@ export const MemoDrawer: React.FC<MemoDrawerProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       fetchMemo();
+      // メモを開いた時に自動でテキストエリアにフォーカス
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, 300); // Drawerのアニメーション後にフォーカス
     }
   }, [isOpen, fetchMemo]);
 
@@ -107,7 +113,13 @@ export const MemoDrawer: React.FC<MemoDrawerProps> = ({ isOpen, onClose }) => {
       <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
-          <Drawer.Content height="60vh" borderTopRadius="xl">
+          <Drawer.Content
+            height="70vh"
+            borderTopRadius="xl"
+            style={{
+              transform: "translateY(-20vh)", // 画面の10%分上に表示
+            }}
+          >
             <Drawer.Header>
               <Drawer.Title>
                 <Text fontSize="lg" fontWeight="bold">
