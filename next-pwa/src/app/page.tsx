@@ -23,9 +23,7 @@ import { getCurrentTerm, getDateRange } from "@/lib/term";
 import dayjs from "dayjs";
 
 export default function Home() {
-  const [groupedQuests, setGroupedQuests] = useState<Record<number, Quest[]>>(
-    {}
-  );
+  const [quests, setQuests] = useState<Quest[]>([]);
   const [editingQuest, setEditingQuest] = useState<{
     term: number;
     title: string;
@@ -64,23 +62,11 @@ export default function Home() {
 
   const fetchQuests = async (fromDate?: string, toDate?: string) => {
     const { data, error } = await fetchQuestsRepo(fromDate, toDate);
+    console.log("Quests fetched:", data);
     if (error) {
       console.error("Error fetching quests:", error);
     } else if (data) {
-      // クエストを日付とタームでグループ化
-      const grouped = data.reduce((acc, quest) => {
-        // 日付とタームを組み合わせたキーを作成
-        // 例: "2023-07-28_1" (2023-07-28の第1ターム)
-        const dateTermKey = `${quest.due_date}_${quest.term ?? -1}`;
-
-        if (!acc[dateTermKey]) {
-          acc[dateTermKey] = [];
-        }
-        acc[dateTermKey].push(quest);
-        return acc;
-      }, {} as Record<string, Quest[]>);
-
-      setGroupedQuests(grouped);
+      setQuests(data);
     }
   };
 
@@ -168,12 +154,8 @@ export default function Home() {
 
   const handleSkipQuest = async (id: string) => {
     // 現在のクエストを取得
-    const currentQuest = Object.values(groupedQuests)
-      .flat()
-      .find((quest) => quest.id === id);
-
+    const currentQuest = quests.find((q) => q.id === id);
     if (!currentQuest) return;
-
     const { error } = await skipQuest(
       id,
       currentQuest.term || 0,
@@ -214,7 +196,7 @@ export default function Home() {
         minH="calc(100vh - 120px)"
       >
         <Timeline
-          groupedQuests={groupedQuests}
+          quests={quests}
           editingQuest={editingQuest}
           onAddQuest={(term: number, date: string) => {
             setEditingQuest({ term: term, title: "", date: date });
